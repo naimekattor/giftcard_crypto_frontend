@@ -1,93 +1,61 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { User, AuthToken } from '@/types';
-import { getAuthToken, clearAuthTokens } from '@/lib/utils';
+
+export type UserRole = 'buyer' | 'seller';
+
+export interface AuthUser {
+  email: string;
+  role: UserRole;
+  token: string;
+}
 
 interface AuthContextType {
-  user: User | null;
-  token: AuthToken | null;
+  user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (user: User, token: AuthToken) => void;
+  login: (user: AuthUser) => void;
   logout: () => void;
-  updateUser: (user: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+const STORAGE_KEY = 'gc_jwt_user';
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<AuthToken | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize from localStorage on mount
   useEffect(() => {
-    const initAuth = () => {
-      try {
-        const savedToken = localStorage.getItem('gc_auth_token');
-        const savedUser = localStorage.getItem('gc_user');
-
-        if (savedToken && savedUser) {
-          // Parse and validate token isn't expired
-          const parsedToken = JSON.parse(savedToken);
-          const parsedUser = JSON.parse(savedUser);
-          setToken(parsedToken);
-          setUser(parsedUser);
-        }
-      } catch (error) {
-        // Token parsing error - clear storage
-        clearAuthTokens();
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initAuth();
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setUser(JSON.parse(saved));
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const login = (newUser: User, newToken: AuthToken) => {
+  const login = (newUser: AuthUser) => {
     setUser(newUser);
-    setToken(newToken);
-    localStorage.setItem('gc_auth_token', JSON.stringify(newToken));
-    localStorage.setItem('gc_user', JSON.stringify(newUser));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
-    setToken(null);
-    clearAuthTokens();
+    localStorage.removeItem(STORAGE_KEY);
   };
 
-  const updateUser = (updates: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-      localStorage.setItem('gc_user', JSON.stringify(updatedUser));
-    }
-  };
-
-  const value: AuthContextType = {
-    user,
-    token,
-    isLoading,
-    isAuthenticated: !!user && !!token,
-    login,
-    logout,
-    updateUser,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useBrowseCards } from '@/features/marketplace/hooks/useMarketplace';
 import type { GiftCardListing } from '@/types';
 import {
@@ -11,6 +11,7 @@ import {
   ChevronRight,
   CircleDollarSign,
   Copy,
+  Globe,
   Search,
   ShieldCheck,
   Sparkles,
@@ -18,6 +19,14 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
+
+const REGIONS = [
+  { code: 'USA', flag: '🇺🇸', label: 'USD', currency: 'USD', rateKey: 'USD', symbol: '$' },
+  { code: 'UK',  flag: '🇬🇧', label: 'GBP', currency: 'GBP', rateKey: 'GBP', symbol: '£' },
+  { code: 'CA',  flag: '🇨🇦', label: 'CAD', currency: 'CAD', rateKey: 'CAD', symbol: 'C$' },
+];
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 type PaymentStep = 'idle' | 'processing' | 'success';
 
@@ -197,6 +206,37 @@ export default function MarketplacePage() {
   const [copiedWallet, setCopiedWallet] = useState(false);
   const { data: cardsData, isLoading } = useBrowseCards(filters);
 
+  // ── Live exchange rate region switcher ───────────────────────────────────
+  const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
+  const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36 });
+  const [ratesLoading, setRatesLoading] = useState(false);
+
+  const fetchRates = useCallback(async () => {
+    setRatesLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/exchange-rates`);
+      if (res.ok) {
+        const data = await res.json();
+        setRates({ USD: data.USD ?? 1, GBP: data.GBP ?? 0.79, CAD: data.CAD ?? 1.36 });
+      }
+    } catch { /* keep defaults */ }
+    finally { setRatesLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchRates(); }, [fetchRates]);
+
+  // Convert a USD price to the selected region's currency
+  const convertPrice = (usdPrice: number) => {
+    const rate = rates[selectedRegion.rateKey] ?? 1;
+    return usdPrice * rate;
+  };
+
+  const formatRegionMoney = (usdPrice: number) => {
+    const converted = convertPrice(usdPrice);
+    return `${selectedRegion.symbol}${converted.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+  // ────────────────────────────────────────────────────────────────────────
+
   const cards = (cardsData?.data ?? []).filter((card) => {
     const searchValue = searchQuery.trim().toLowerCase();
     const matchesSearch =
@@ -344,7 +384,45 @@ export default function MarketplacePage() {
           </div>
         </section>
 
-        <section className="mt-8 rounded-[28px] border border-black/5 bg-white/80 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)] backdrop-blur">
+        {/* ── Region / Currency Switcher ─────────────────────────────────────── */}
+        <section className="mt-6 rounded-[24px] border border-black/5 bg-white/90 px-5 py-4 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+              <Globe className="h-4 w-4 text-slate-400" />
+              View prices in:
+            </div>
+            <div className="flex gap-2">
+              {REGIONS.map((r) => (
+                <button
+                  key={r.code}
+                  id={`region-${r.code}`}
+                  onClick={() => setSelectedRegion(r)}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+                    selectedRegion.code === r.code
+                      ? 'bg-slate-950 text-white shadow-md'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <span>{r.flag}</span>
+                  <span>{r.label}</span>
+                </button>
+              ))}
+            </div>
+            {ratesLoading ? (
+              <span className="ml-2 text-xs text-slate-400 flex items-center gap-1">
+                <span className="inline-block w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                Fetching live rates…
+              </span>
+            ) : (
+              <span className="ml-2 text-xs text-slate-400">
+                1 USD = {selectedRegion.symbol}{(rates[selectedRegion.rateKey] ?? 1).toFixed(4)} {selectedRegion.currency} · Live
+              </span>
+            )}
+          </div>
+        </section>
+
+        {/* ── Search / Filter Bar ──────────────────────────────────────────────── */}
+        <section className="mt-4 rounded-[28px] border border-black/5 bg-white/80 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr_0.8fr]">
             <label className="relative block">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -453,12 +531,15 @@ export default function MarketplacePage() {
                         </div>
                       </div>
 
-                      <div className="space-y-5 p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-xs uppercase tracking-[0.22em] text-slate-400">Checkout price</div>
-                            <div className="mt-1 text-2xl font-semibold text-slate-950">{formatMoney(card.sellingPrice)}</div>
-                          </div>
+                        <div className="space-y-5 p-6">
+                         <div className="flex items-center justify-between">
+                           <div>
+                             <div className="text-xs uppercase tracking-[0.22em] text-slate-400">
+                               Price · {selectedRegion.flag} {selectedRegion.currency}
+                             </div>
+                             <div className="mt-1 text-2xl font-semibold text-slate-950">{formatRegionMoney(card.sellingPrice)}</div>
+                             <div className="text-xs text-slate-400 mt-0.5">(≈ {formatMoney(card.sellingPrice)} USD)</div>
+                           </div>
                           <div className="rounded-2xl bg-[#f6f1e8] px-4 py-3 text-right">
                             <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Seller score</div>
                             <div className="mt-1 text-sm font-semibold text-slate-900">

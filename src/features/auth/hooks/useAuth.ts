@@ -1,81 +1,48 @@
-/**
- * Authentication Hooks
- * Reusable hooks for auth operations
- */
-
 'use client';
 
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { authService } from '@/features/auth/services/authService';
-import type { AuthCredentials } from '@/types';
+import type { LoginPayload, RegisterPayload } from '@/features/auth/services/authService';
 
-/**
- * Hook for login
- */
 export function useLogin() {
   const { login } = useAuth();
+  const router = useRouter();
 
   return useMutation({
-    mutationFn: async (credentials: AuthCredentials) => {
-      const response = await authService.login(credentials);
-      login(response.user, response.token);
-      return response;
+    mutationFn: async (payload: LoginPayload) => {
+      const result = await authService.login(payload);
+      login({ email: result.email, role: result.role as 'buyer' | 'seller', token: result.token });
+      return result;
+    },
+    onSuccess: (result) => {
+      router.push(result.role === 'seller' ? '/dashboard/seller' : '/dashboard/buyer');
     },
   });
 }
 
-/**
- * Hook for signup
- */
-export function useSignup() {
-  const { login } = useAuth();
+export function useRegister() {
+  const router = useRouter();
 
   return useMutation({
-    mutationFn: async (credentials: AuthCredentials) => {
-      const response = await authService.signup(credentials);
-      login(response.user, response.token);
-      return response;
+    mutationFn: async (payload: RegisterPayload) => {
+      await authService.register(payload);
+      // After registration redirect to login
+      return payload.role;
+    },
+    onSuccess: () => {
+      router.push('/login?registered=true');
     },
   });
 }
 
-/**
- * Hook for logout
- */
 export function useLogout() {
   const { logout } = useAuth();
+  const router = useRouter();
 
-  return useMutation({
-    mutationFn: async () => {
-      await authService.logout();
-      logout();
-    },
-  });
-}
-
-/**
- * Hook for password reset request
- */
-export function useRequestPasswordReset() {
-  return useMutation({
-    mutationFn: (identifier: string) =>
-      authService.requestPasswordReset(identifier),
-  });
-}
-
-/**
- * Hook for confirming password reset
- */
-export function useConfirmPasswordReset() {
-  return useMutation({
-    mutationFn: ({
-      token,
-      newPassword,
-    }: {
-      token: string;
-      newPassword: string;
-    }) => authService.confirmPasswordReset(token, newPassword),
-  });
+  return () => {
+    logout();
+    router.push('/login');
+  };
 }
