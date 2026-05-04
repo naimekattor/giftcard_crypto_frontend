@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
+export { useAuth };
 import { authService } from '@/features/auth/services/authService';
 import type { LoginPayload, RegisterPayload } from '@/features/auth/services/authService';
 

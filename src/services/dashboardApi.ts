@@ -14,7 +14,11 @@ async function authFetch<T>(path: string, token: string, options: RequestInit = 
     },
   });
   const json = await res.json();
-  if (!res.ok) throw new Error(json.error || 'Request failed');
+  if (!res.ok) {
+    const errorMessage = json.error || 'Request failed';
+    const details = json.details ? ` (${json.details.join(', ')})` : '';
+    throw new Error(errorMessage + details);
+  }
   return json as T;
 }
 
