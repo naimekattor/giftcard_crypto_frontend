@@ -12,13 +12,19 @@ import {
   CircleDollarSign,
   Copy,
   Globe,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Tag,
   Wallet,
   X,
+  ExternalLink,
+  Loader2,
+  Sparkles ,
+  Search ,
+  Tag ,
+  ShieldCheck 
 } from 'lucide-react';
+import { ethers } from 'ethers';
+import Swal from 'sweetalert2';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { buyerApi } from '@/services/dashboardApi';
 
 const REGIONS = [
   { code: 'USA', flag: '🇺🇸', label: 'USD', currency: 'USD', rateKey: 'USD', symbol: '$' },
@@ -28,7 +34,7 @@ const REGIONS = [
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-type PaymentStep = 'idle' | 'processing' | 'success';
+type PaymentStep = 'idle' | 'connecting' | 'paying' | 'confirming' | 'success';
 
 type CryptoMethod = {
   id: string;
@@ -42,6 +48,16 @@ type CryptoMethod = {
 };
 
 const cryptoMethods: CryptoMethod[] = [
+  {
+    id: 'eth-sepolia',
+    symbol: 'ETH',
+    accent: '#627EEA',
+    label: 'Ethereum',
+    network: 'Sepolia',
+    rate: 2650.0,
+    wallet: 'MetaMask Required',
+    eta: '~30s',
+  },
   {
     id: 'usdt-trc20',
     symbol: 'USDT',
@@ -204,11 +220,19 @@ export default function MarketplacePage() {
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoMethod>(cryptoMethods[0]);
   const [copiedWallet, setCopiedWallet] = useState(false);
+  const { user } = useAuth();
   const { data: cardsData, isLoading } = useBrowseCards(filters);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [activePaymentId, setActivePaymentId] = useState<number | null>(null);
+  const [polling, setPolling] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [purchasedCard, setPurchasedCard] = useState<CardRecord | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [pinCopied, setPinCopied] = useState(false);
 
   // ── Live exchange rate region switcher ───────────────────────────────────
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
-  const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36 });
+  const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
   const [ratesLoading, setRatesLoading] = useState(false);
 
   const fetchRates = useCallback(async () => {
@@ -217,7 +241,12 @@ export default function MarketplacePage() {
       const res = await fetch(`${API_BASE}/exchange-rates`);
       if (res.ok) {
         const data = await res.json();
-        setRates({ USD: data.USD ?? 1, GBP: data.GBP ?? 0.79, CAD: data.CAD ?? 1.36 });
+        setRates({ 
+          USD: data.USD ?? 1, 
+          GBP: data.GBP ?? 0.79, 
+          CAD: data.CAD ?? 1.36,
+          ETH: data.ETH ?? 2650
+        });
       }
     } catch { /* keep defaults */ }
     finally { setRatesLoading(false); }
@@ -296,12 +325,115 @@ export default function MarketplacePage() {
     setPaymentStep('idle');
   };
 
-  const confirmMockPayment = () => {
-    setPaymentStep('processing');
-    window.setTimeout(() => {
-      setPaymentStep('success');
-    }, 2200);
+  const connectWallet = async () => {
+    if (typeof window === 'undefined' || !(window as any).ethereum) {
+      throw new Error('MetaMask not detected. Please install the MetaMask extension.');
+    }
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    
+    try {
+      await (window as any).ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0xaa36a7' }], 
+      });
+    } catch (switchError: any) {
+      if (switchError.code === 4902) {
+        await (window as any).ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0xaa36a7',
+            chainName: 'Sepolia Test Network',
+            nativeCurrency: { name: 'SepoliaETH', symbol: 'ETH', decimals: 18 },
+            rpcUrls: ['https://rpc.sepolia.org'],
+            blockExplorerUrls: ['https://sepolia.etherscan.io'],
+          }],
+        });
+      } else {
+        throw switchError;
+      }
+    }
+
+    const accounts = await provider.send("eth_requestAccounts", []);
+    setWalletAddress(accounts[0]);
+    return { provider, address: accounts[0] };
   };
+
+  const handleRealPayment = async () => {
+    if (!selectedCard || !user) {
+      Swal.fire('Auth Required', 'Please log in to complete your purchase.', 'warning');
+      return;
+    }
+    
+    if (selectedCrypto.id !== 'eth-sepolia') {
+      Swal.fire('Demo Mode', 'For this demo, only real MetaMask payments are enabled for ETH (Sepolia).', 'info');
+      return;
+    }
+
+    setPaymentStep('connecting');
+    try {
+      const { provider, address } = await connectWallet();
+      
+      setPaymentStep('paying');
+      // Step 1: POST /buy
+      const intent = await buyerApi.buyCard(user.token, Number(selectedCard.id), address);
+      setActivePaymentId(intent.payment_id);
+
+      // Step 2: MetaMask Transaction
+      const signer = await provider.getSigner();
+      const tx = await signer.sendTransaction({
+        to: intent.pay_to,
+        value: ethers.parseEther(intent.amount.toString()),
+      });
+
+      setTxHash(tx.hash);
+      setPaymentStep('confirming');
+
+      // Step 3: Start Polling
+      setPolling(true);
+
+    } catch (e: any) {
+      console.error(e);
+      let msg = e.message || 'Something went wrong';
+      if (e.code === 'ACTION_REJECTED') msg = 'Transaction rejected in MetaMask.';
+      
+      Swal.fire({
+        title: 'Payment Error',
+        text: msg,
+        icon: 'error',
+        background: '#16110c',
+        color: '#fff',
+        confirmButtonColor: '#f59f0b'
+      });
+      setPaymentStep('idle');
+    }
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (polling && user && activePaymentId) {
+      interval = setInterval(async () => {
+        try {
+          const payments = await buyerApi.getPayments(user.token);
+          const current = payments.find(p => p.id === activePaymentId);
+          if (current && ['holding', 'completed'].includes(current.status)) {
+            setPolling(false);
+            setPurchasedCard(current.card || null);
+            setPaymentStep('success');
+            Swal.fire({
+              title: 'Success!',
+              text: 'Blockchain payment confirmed. Your gift card is ready.',
+              icon: 'success',
+              background: '#16110c',
+              color: '#fff'
+            });
+          }
+        } catch (e) {
+          console.error('Polling error:', e);
+        }
+      }, 3500);
+    }
+    return () => clearInterval(interval);
+  }, [polling, user, activePaymentId]);
 
   const copyWalletAddress = async () => {
     if (!navigator?.clipboard) {
@@ -312,7 +444,8 @@ export default function MarketplacePage() {
     setCopiedWallet(true);
   };
 
-  const paymentAmount = selectedCard ? selectedCard.sellingPrice / selectedCrypto.rate : 0;
+  const currentEthRate = rates['ETH'] || 2650;
+  const paymentAmount = selectedCard ? selectedCard.sellingPrice / currentEthRate : 0;
 
   return (
     <div className="min-h-screen bg-[#f6f1e8] text-slate-950">
@@ -610,7 +743,7 @@ export default function MarketplacePage() {
               <div>
                 <h3 className="text-xl font-semibold">Sell your gift cards for crypto</h3>
                 <p className="mt-1 max-w-2xl text-sm text-slate-800">
-                  The checkout here is a mock payment experience, but the UI is ready for a real wallet integration later.
+                  Ready to cash out? List your cards and receive crypto payments directly to your wallet.
                 </p>
               </div>
             </div>
@@ -637,10 +770,10 @@ export default function MarketplacePage() {
 
                 <div className="relative flex min-h-[380px] flex-col justify-between">
                   <div>
-                    <div className="text-xs uppercase tracking-[0.3em] text-white/80">Mock crypto checkout</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-white/80">Real crypto checkout</div>
                     <h2 className="mt-4 text-4xl font-semibold">{selectedCard.retailerName}</h2>
                     <p className="mt-3 max-w-sm text-sm leading-6 text-white/80">
-                      Pay with crypto, simulate confirmation, and reveal a demo redemption code once the mock transaction completes.
+                      Connect your MetaMask, pay with Sepolia ETH, and receive your gift card code instantly after blockchain confirmation.
                     </p>
                   </div>
 
@@ -670,8 +803,8 @@ export default function MarketplacePage() {
                     <div className="text-xs uppercase tracking-[0.26em] text-slate-400">Payment rail</div>
                     <h3 className="mt-2 text-2xl font-semibold text-slate-950">Choose a crypto method</h3>
                   </div>
-                  <div className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700">
-                    Demo payment
+                  <div className="rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
+                    Sepolia Network
                   </div>
                 </div>
 
@@ -777,50 +910,120 @@ export default function MarketplacePage() {
                       </div>
 
                       <button
-                        onClick={confirmMockPayment}
+                        onClick={handleRealPayment}
                         className="mt-6 flex h-14 w-full items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white transition hover:bg-slate-800"
                       >
-                        I have paid in {selectedCrypto.symbol}
+                        {paymentStep === 'idle' ? `Pay with MetaMask (${selectedCrypto.symbol})` : 'Processing...'}
                       </button>
                     </>
                   ) : null}
 
-                  {paymentStep === 'processing' ? (
+                  {['connecting', 'paying', 'confirming'].includes(paymentStep) && (
                     <div className="py-10 text-center">
-                      <div className="mx-auto h-14 w-14 animate-spin rounded-full border-4 border-slate-300 border-t-slate-950" />
-                      <h4 className="mt-5 text-xl font-semibold text-slate-950">Verifying mock payment</h4>
+                      <Loader2 className="mx-auto h-14 w-14 animate-spin text-slate-950" />
+                      <h4 className="mt-5 text-xl font-semibold text-slate-950">
+                        {paymentStep === 'connecting' && 'Connecting Wallet...'}
+                        {paymentStep === 'paying' && 'Confirm Payment in MetaMask...'}
+                        {paymentStep === 'confirming' && 'Confirming on Blockchain...'}
+                      </h4>
                       <p className="mt-2 text-sm text-slate-600">
-                        Simulating blockchain confirmations on {selectedCrypto.network}.
+                        {paymentStep === 'confirming' 
+                          ? 'Waiting for Sepolia network confirmation (~15-30s)...' 
+                          : 'Please follow the instructions in your MetaMask popup.'}
                       </p>
+                      {txHash && (
+                        <a 
+                          href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-500 transition"
+                        >
+                          View Transaction <ExternalLink className="h-4 w-4" />
+                        </a>
+                      )}
                     </div>
-                  ) : null}
+                  )}
 
                   {paymentStep === 'success' ? (
                     <div className="py-2">
                       <div className="flex items-center gap-3 text-emerald-700">
                         <CheckCircle2 className="h-6 w-6" />
-                        <h4 className="text-xl font-semibold">Mock payment confirmed</h4>
+                        <h4 className="text-xl font-semibold">Payment Confirmed!</h4>
                       </div>
                       <p className="mt-2 text-sm text-slate-600">
-                        This is a demo checkout. The code below is mock data for UI testing.
+                        Your transaction was successfully verified on the blockchain. Your gift card code is now unlocked.
                       </p>
 
-                      <div className="mt-5 rounded-2xl border border-emerald-100 bg-white p-4">
-                        <div className="text-xs uppercase tracking-[0.22em] text-slate-400">Gift card code</div>
-                        <div className="mt-2 font-mono text-lg font-semibold text-slate-950">
-                          {makeGiftCode(selectedCard)}
+                      <div className="mt-5 space-y-4 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs uppercase tracking-[0.22em] text-slate-400">Gift card code</div>
+                            <button 
+                              onClick={() => {
+                                const code = purchasedCard?.card_code || '';
+                                navigator.clipboard.writeText(code);
+                                setCodeCopied(true);
+                                setTimeout(() => setCodeCopied(false), 2000);
+                              }}
+                              className="text-[10px] font-bold text-emerald-600 uppercase hover:text-emerald-500 transition"
+                            >
+                              {codeCopied ? 'Copied!' : 'Copy Full Code'}
+                            </button>
+                          </div>
+                          <div className="mt-2 flex items-center gap-3">
+                            <div className="flex-1 font-mono text-xl font-bold tracking-wider text-slate-950 bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+                              {purchasedCard?.card_code 
+                                ? `•••• •••• •••• ${purchasedCard.card_code.slice(-4)}`
+                                : '•••• •••• •••• ••••'}
+                            </div>
+                          </div>
                         </div>
+
+                        {purchasedCard?.card_pin && (
+                          <div className="pt-4 border-t border-slate-50">
+                            <div className="flex items-center justify-between">
+                              <div className="text-xs uppercase tracking-[0.22em] text-slate-400">Security PIN</div>
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(purchasedCard.card_pin || '');
+                                  setPinCopied(true);
+                                  setTimeout(() => setPinCopied(false), 2000);
+                                }}
+                                className="text-[10px] font-bold text-emerald-600 uppercase hover:text-emerald-500 transition"
+                              >
+                                {pinCopied ? 'Copied!' : 'Copy PIN'}
+                              </button>
+                            </div>
+                            <div className="mt-2 font-mono text-lg font-bold text-slate-950 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 inline-block min-w-[100px]">
+                              {purchasedCard.card_pin}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
-                        Transaction hash: <span className="font-mono text-xs">0xmock{selectedCard.id.replace(/-/g, '')}{selectedCrypto.symbol.toLowerCase()}</span>
+                      <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Status:</span>
+                          <span className="font-medium text-emerald-600">Verified</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">TX Hash:</span>
+                          <a 
+                            href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-xs text-blue-600 hover:underline truncate ml-4"
+                          >
+                            {txHash}
+                          </a>
+                        </div>
                       </div>
 
                       <button
                         onClick={closeCheckout}
                         className="mt-6 flex h-14 w-full items-center justify-center rounded-2xl bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-500"
                       >
-                        Close checkout
+                        Finish & Close
                       </button>
                     </div>
                   ) : null}

@@ -1,21 +1,81 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { useLogout } from '@/features/auth/hooks/useAuth';
+
+interface Card {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  status: string;
+  retailer: string;
+  seller_id: number;
+  card_code?: string;
+  created_at?: string;
+}
 
 export default function AdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const logout = useLogout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  // Fetch pending cards
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:4000/cards', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Failed to fetch cards');
+        const data = await res.json();
+        setCards(data.filter((c: Card) => c.status === 'pending_approval'));
+        setLoading(false);
+      } catch (err: any) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    fetchCards();
+  }, []);
+
+  const handleAction = async (cardId: number, action: 'approve' | 'reject') => {
+    setActionLoading(cardId);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:4000/admin/cards/${cardId}/${action}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || `Failed to ${action} card`);
+      }
+      setCards(cards.filter((c) => c.id !== cardId));
+      alert(`Card ${action}d successfully!`);
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   // Mock data for demonstration
   const stats = {
     totalUsers: 1250,
     totalTransactions: 5643,
     totalVolume: 285750,
-    pendingVerifications: 45,
+    pendingVerifications: cards.length,
     fraudReports: 3,
   };
 
@@ -177,16 +237,67 @@ export default function AdminDashboard() {
             {/* Verification Queue */}
             <div className="bg-slate-900 rounded-2xl border border-white/5 overflow-hidden">
               <div className="px-4 lg:px-6 py-4 lg:py-5 border-b border-white/5">
-                <h2 className="text-base lg:text-lg font-bold text-white">Verification Queue</h2>
+                <h2 className="text-base lg:text-lg font-bold text-white">Pending Card Verifications</h2>
               </div>
-              <div className="px-4 lg:px-6 py-8 lg:py-12 flex flex-col items-center justify-center text-center">
-                <div className="text-4xl lg:text-5xl mb-4">⏳</div>
-                <p className="text-lg lg:text-xl font-semibold text-slate-300">{stats.pendingVerifications} Gift Cards Pending</p>
-                <p className="text-sm text-slate-500 mt-2">Action required to process verifications</p>
-                <button className="mt-6 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-semibold text-sm transition-all">
-                  Review Now
-                </button>
-              </div>
+              {loading ? (
+                <div className="px-4 lg:px-6 py-8 lg:py-12 flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+                </div>
+              ) : error ? (
+                <div className="px-4 lg:px-6 py-8 lg:py-12 text-center text-red-400">
+                  {error}
+                </div>
+              ) : cards.length === 0 ? (
+                <div className="px-4 lg:px-6 py-8 lg:py-12 flex flex-col items-center justify-center text-center">
+                  <div className="text-4xl lg:text-5xl mb-4">✅</div>
+                  <p className="text-lg lg:text-xl font-semibold text-slate-300">No pending cards</p>
+                  <p className="text-sm text-slate-500 mt-2">All cards have been reviewed</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/5 text-left text-xs text-slate-500">
+                        <th className="px-4 lg:px-6 py-3">ID</th>
+                        <th className="px-4 lg:px-6 py-3">Name</th>
+                        <th className="px-4 lg:px-6 py-3">Retailer</th>
+                        <th className="px-4 lg:px-6 py-3">Price</th>
+                        <th className="px-4 lg:px-6 py-3">Seller ID</th>
+                        <th className="px-4 lg:px-6 py-3">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cards.map((card) => (
+                        <tr key={card.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                          <td className="px-4 lg:px-6 py-3 text-sm text-slate-300">{card.id}</td>
+                          <td className="px-4 lg:px-6 py-3 text-sm text-white font-medium">{card.name}</td>
+                          <td className="px-4 lg:px-6 py-3 text-sm text-slate-300">{card.retailer}</td>
+                          <td className="px-4 lg:px-6 py-3 text-sm text-slate-300">${card.price}</td>
+                          <td className="px-4 lg:px-6 py-3 text-sm text-slate-300">{card.seller_id}</td>
+                          <td className="px-4 lg:px-6 py-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleAction(card.id, 'approve')}
+                                disabled={actionLoading === card.id}
+                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition-all"
+                              >
+                                {actionLoading === card.id ? '...' : 'Approve'}
+                              </button>
+                              <button
+                                onClick={() => handleAction(card.id, 'reject')}
+                                disabled={actionLoading === card.id}
+                                className="px-3 py-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition-all"
+                              >
+                                {actionLoading === card.id ? '...' : 'Reject'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </main>
         </div>

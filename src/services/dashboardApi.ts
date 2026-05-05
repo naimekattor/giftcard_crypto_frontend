@@ -29,18 +29,22 @@ export interface CardRecord {
   retailer: string;
   denomination: number;
   price: number;
-  status: 'active' | 'sold' | 'cancelled';
-  region: string;
-  currency: string;
-  created_at?: string;
+  status: string;
+  region?: string;
+  currency?: string;
+  createdAt: string;
+  card_code?: string;
+  card_pin?: string;
 }
 
 export interface PaymentRecord {
   id: number;
+  card_id: number;
   amount: number;
   status: 'pending' | 'holding' | 'completed' | 'returned';
   complaint_status: 'none' | 'complained' | 'valid';
-  created_at: string;
+  external_id?: string;
+  created_at?: string;
   card?: CardRecord;
 }
 
@@ -61,6 +65,21 @@ export const buyerApi = {
       `/buyer/payments/${paymentId}/confirm`,
       token,
       { method: 'POST' }
+    ),
+
+  buyCard: (token: string, cardId: number, walletAddress?: string) =>
+    authFetch<{ 
+      payment_id: number; 
+      amount: number; 
+      pay_to: string; 
+      asset: string;
+    }>(
+      '/buy',
+      token,
+      { 
+        method: 'POST',
+        body: JSON.stringify({ card_id: cardId, wallet_address: walletAddress })
+      }
     ),
 };
 

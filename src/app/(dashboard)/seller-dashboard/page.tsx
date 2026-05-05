@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { useLogout } from '@/features/auth/hooks/useAuth';
 import { sellerApi, type CardRecord } from '@/services/dashboardApi';
 import Image from 'next/image';
+import Swal from 'sweetalert2';
 const statusStyles: Record<string, string> = {
   active:    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   sold:      'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -52,14 +53,54 @@ export default function SellerDashboardPage() {
 
   const handleCancel = async (id: number) => {
     if (!user) return;
-    if (!confirm('Are you sure you want to cancel this listing?')) return;
+    
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you want to cancel this listing? This action cannot be undone.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f97316', // orange-500
+      cancelButtonColor: '#64748b',  // slate-500
+      confirmButtonText: 'Yes, cancel it!',
+      background: '#0f172a', // slate-900
+      color: '#fff',
+      customClass: {
+        popup: 'rounded-3xl border border-white/10 shadow-2xl',
+        title: 'text-2xl font-bold',
+        confirmButton: 'rounded-xl font-bold px-6 py-3',
+        cancelButton: 'rounded-xl font-bold px-6 py-3',
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setActionLoading(id);
     try {
       await sellerApi.cancelCard(user.token, id);
-      showToast('Card cancelled successfully.', 'success');
+      Swal.fire({
+        title: 'Cancelled!',
+        text: 'Your listing has been successfully cancelled.',
+        icon: 'success',
+        background: '#0f172a',
+        color: '#fff',
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: {
+          popup: 'rounded-3xl border border-white/10 shadow-2xl',
+        }
+      });
       load();
     } catch (e: any) {
-      showToast(e.message, 'error');
+      Swal.fire({
+        title: 'Error!',
+        text: e.message || 'Failed to cancel listing',
+        icon: 'error',
+        background: '#0f172a',
+        color: '#fff',
+        customClass: {
+          popup: 'rounded-3xl border border-white/10 shadow-2xl',
+        }
+      });
     } finally {
       setActionLoading(null);
     }
