@@ -16,6 +16,7 @@ const statusStyles: Record<string, string> = {
 const statusIcons: Record<string, string> = { active: '🟢', sold: '🔵', cancelled: '⚫' };
 
 const currencySymbols: Record<string, string> = { GBP: '£', USD: '$', CAD: 'C$' };
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function SellerDashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -238,7 +239,7 @@ export default function SellerDashboardPage() {
                 { label: 'Total Listings', value: stats.total, icon: '📋', color: 'from-slate-700 to-slate-800' },
                 { label: 'Active', value: stats.active, icon: '🟢', color: 'from-emerald-700 to-emerald-900' },
                 { label: 'Sold', value: stats.sold, icon: '🔵', color: 'from-blue-700 to-blue-900' },
-                { label: 'Earned (ETH)', value: stats.totalEarnings.toFixed(6), icon: '⟠', color: 'from-orange-700 to-orange-900' },
+                { label: 'Earned ', value: stats.totalEarnings, icon: '⟠', color: 'from-orange-700 to-orange-900' },
               ].map((s) => (
                 <div key={s.label} className={`bg-gradient-to-br ${s.color} rounded-2xl p-4 lg:p-5 shadow-xl`}>
                   <div className="text-xl lg:text-2xl mb-1 lg:mb-2">{s.icon}</div>
@@ -278,7 +279,7 @@ export default function SellerDashboardPage() {
                     <table className="w-full min-w-[640px]">
                       <thead>
                         <tr className="border-b border-white/5">
-                          {['Card', 'Region', 'Face Value', 'Asking Price', 'Status', 'Actions'].map(h => (
+                          {['Card', 'Region', 'Asking Price', 'Status', 'Actions'].map(h => (
                             <th key={h} className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                           ))}
                         </tr>
@@ -289,9 +290,24 @@ export default function SellerDashboardPage() {
                           return (
                             <tr key={card.id} className="hover:bg-white/2 transition-colors">
                               <td className="px-4 lg:px-6 py-4">
-                                <div>
-                                  <p className="font-semibold text-white text-sm">{card.name}</p>
-                                  <p className="text-xs text-slate-500 mt-0.5">{card.retailer}</p>
+                                <div className="flex items-center gap-3">
+                                  {card.file_path ? (
+                                    <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10">
+                                      <img 
+                                        src={`${API_BASE}/${card.file_path}`} 
+                                        alt={card.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
+                                      <span className="text-lg">🪪</span>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <p className="font-semibold text-white text-sm">{card.name}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">{card.retailer}</p>
+                                  </div>
                                 </div>
                               </td>
                               <td className="px-4 lg:px-6 py-4">
@@ -302,11 +318,8 @@ export default function SellerDashboardPage() {
                                   <span className="text-sm text-slate-300">{card.region}</span>
                                 </div>
                               </td>
-                              <td className="px-4 lg:px-6 py-4 text-sm font-semibold text-white whitespace-nowrap">
-                                {sym}{card.denomination?.toFixed(2) ?? '—'}
-                              </td>
-                              <td className="px-4 lg:px-6 py-4 text-sm font-mono text-slate-300 whitespace-nowrap">
-                                {card.price.toFixed(6)} ETH
+                              <td className="px-4 lg:px-6 py-4 text-sm font-mono text-white whitespace-nowrap">
+                                {card.price} 
                               </td>
                               <td className="px-4 lg:px-6 py-4">
                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border whitespace-nowrap ${statusStyles[card.status] || statusStyles.cancelled}`}>
@@ -361,17 +374,13 @@ export default function SellerDashboardPage() {
                               {statusIcons[card.status]}
                             </span>
                           </div>
-                          <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+                          <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                             <div className="bg-white/5 rounded-lg p-2">
                               <p className="text-slate-500">Region</p>
                               <p className="text-white font-semibold mt-1">{card.region === 'UK' ? '🇬🇧' : card.region === 'USA' ? '🇺🇸' : '🇨🇦'} {card.region}</p>
                             </div>
                             <div className="bg-white/5 rounded-lg p-2">
-                              <p className="text-slate-500">Face Value</p>
-                              <p className="text-white font-semibold mt-1">{sym}{card.denomination?.toFixed(2) ?? '—'}</p>
-                            </div>
-                            <div className="bg-white/5 rounded-lg p-2">
-                              <p className="text-slate-500">Price</p>
+                              <p className="text-slate-500">Price (ETH)</p>
                               <p className="text-white font-semibold mt-1">{card.price.toFixed(4)} ETH</p>
                             </div>
                           </div>

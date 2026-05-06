@@ -49,6 +49,7 @@ export interface GiftCard {
   sellerId: string; // Anonymous seller ID
   description?: string;
   images?: string[];
+  file_path?: string;
   createdAt: string;
   updatedAt: string;
   expiryDate?: string;

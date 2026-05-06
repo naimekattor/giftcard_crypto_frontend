@@ -35,6 +35,7 @@ export interface CardRecord {
   createdAt: string;
   card_code?: string;
   card_pin?: string;
+  file_path?: string;
 }
 
 export interface PaymentRecord {

@@ -58,36 +58,36 @@ const cryptoMethods: CryptoMethod[] = [
     wallet: 'MetaMask Required',
     eta: '~30s',
   },
-  {
-    id: 'usdt-trc20',
-    symbol: 'USDT',
-    accent: '#26A17B',
-    label: 'Tether',
-    network: 'TRC20',
-    rate: 1,
-    wallet: 'TLt4t4VxKkY1demo7vF3n4m1kcrypto9',
-    eta: '1 to 2 min',
-  },
-  {
-    id: 'btc',
-    symbol: 'BTC',
-    accent: '#F7931A',
-    label: 'Bitcoin',
-    network: 'Bitcoin',
-    rate: 64250,
-    wallet: 'bc1qdemo5uq6r4j9u6x8f4lqytw0mockpay77',
-    eta: '8 to 15 min',
-  },
-  {
-    id: 'eth',
-    symbol: 'ETH',
-    accent: '#627EEA',
-    label: 'Ethereum',
-    network: 'ERC20',
-    rate: 3180,
-    wallet: '0xAbC1D3f0DemoWallet44D8f73c4b8674A3e2',
-    eta: '2 to 5 min',
-  },
+  // {
+  //   id: 'usdt-trc20',
+  //   symbol: 'USDT',
+  //   accent: '#26A17B',
+  //   label: 'Tether',
+  //   network: 'TRC20',
+  //   rate: 1,
+  //   wallet: 'TLt4t4VxKkY1demo7vF3n4m1kcrypto9',
+  //   eta: '1 to 2 min',
+  // },
+  // {
+  //   id: 'btc',
+  //   symbol: 'BTC',
+  //   accent: '#F7931A',
+  //   label: 'Bitcoin',
+  //   network: 'Bitcoin',
+  //   rate: 64250,
+  //   wallet: 'bc1qdemo5uq6r4j9u6x8f4lqytw0mockpay77',
+  //   eta: '8 to 15 min',
+  // },
+  // {
+  //   id: 'eth',
+  //   symbol: 'ETH',
+  //   accent: '#627EEA',
+  //   label: 'Ethereum',
+  //   network: 'ERC20',
+  //   rate: 3180,
+  //   wallet: '0xAbC1D3f0DemoWallet44D8f73c4b8674A3e2',
+  //   eta: '2 to 5 min',
+  // },
 ];
 
 const retailerThemes: Record<
@@ -233,7 +233,8 @@ export default function MarketplacePage() {
   // ── Live exchange rate region switcher ───────────────────────────────────
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
-  const [ratesLoading, setRatesLoading] = useState(false);
+  const [ratesSource, setRatesSource] = useState<'default' | 'live'>('default');
+  const [ratesLoading, setRatesLoading] = useState(true);
 
   const fetchRates = useCallback(async () => {
     setRatesLoading(true);
@@ -241,14 +242,23 @@ export default function MarketplacePage() {
       const res = await fetch(`${API_BASE}/exchange-rates`);
       if (res.ok) {
         const data = await res.json();
+        console.log('[Marketplace] Exchange rates fetched successfully:', data);
         setRates({ 
           USD: data.USD ?? 1, 
           GBP: data.GBP ?? 0.79, 
           CAD: data.CAD ?? 1.36,
           ETH: data.ETH ?? 2650
         });
+        setRatesSource('live');
+      } else {
+        console.warn('[Marketplace] Failed to fetch exchange rates, using defaults.');
+        setRatesSource('default');
       }
-    } catch { /* keep defaults */ }
+    } catch (err) {
+      console.error('[Marketplace] Error fetching exchange rates:', err);
+      setRatesSource('default');
+      /* keep defaults */ 
+    }
     finally { setRatesLoading(false); }
   }, []);
 
@@ -263,6 +273,12 @@ export default function MarketplacePage() {
   const formatRegionMoney = (usdPrice: number) => {
     const converted = convertPrice(usdPrice);
     return `${selectedRegion.symbol}${converted.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const estimateEth = (fiatPrice: number) => {
+    // We assume sellingPrice is in USD for now, but we should handle the card's specific currency
+    const ethPriceInUsd = rates.ETH || 2650;
+    return fiatPrice / ethPriceInUsd;
   };
   // ────────────────────────────────────────────────────────────────────────
 
@@ -280,11 +296,7 @@ export default function MarketplacePage() {
   const sortedCards = [...cards].sort((a, b) => {
     if (sortBy === 'price-low') return a.sellingPrice - b.sellingPrice;
     if (sortBy === 'price-high') return b.sellingPrice - a.sellingPrice;
-    if (sortBy === 'discount') {
-      const aDiscount = ((a.denomination - a.sellingPrice) / a.denomination) * 100;
-      const bDiscount = ((b.denomination - b.sellingPrice) / b.denomination) * 100;
-      return bDiscount - aDiscount;
-    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -480,7 +492,6 @@ export default function MarketplacePage() {
             <div className="grid gap-4">
               {sortedCards.slice(0, 2).map((card) => {
                 const theme = getRetailerTheme(card.retailerId);
-                const discount = Math.round(((card.denomination - card.sellingPrice) / card.denomination) * 100);
 
                 return (
                   <div
@@ -495,18 +506,15 @@ export default function MarketplacePage() {
                           <div className="text-[11px] uppercase tracking-[0.28em] text-white/70">{theme.eyebrow}</div>
                           <div className="mt-3 text-2xl font-semibold">{card.retailerName}</div>
                         </div>
-                        <div className="rounded-full bg-white/16 px-3 py-1 text-xs font-semibold">
-                          Save {discount}%
-                        </div>
                       </div>
 
                       <div className="flex items-end justify-between">
                         <div>
-                          <div className="text-xs uppercase tracking-[0.22em] text-white/70">Card value</div>
-                          <div className="mt-1 text-4xl font-semibold">{formatMoney(card.denomination)}</div>
+                          <div className="text-xs uppercase tracking-[0.22em] text-white/70">Price (ETH)</div>
+                          <div className="mt-1 text-4xl font-semibold">{card.sellingPrice.toFixed(4)} ETH</div>
                         </div>
                         <div className="rounded-full border border-white/20 bg-black/10 px-4 py-2 text-sm font-medium backdrop-blur">
-                          Pay {formatMoney(card.sellingPrice)}
+                          Instant reveal
                         </div>
                       </div>
                     </div>
@@ -547,8 +555,9 @@ export default function MarketplacePage() {
                 Fetching live rates…
               </span>
             ) : (
-              <span className="ml-2 text-xs text-slate-400">
-                1 USD = {selectedRegion.symbol}{(rates[selectedRegion.rateKey] ?? 1).toFixed(4)} {selectedRegion.currency} · Live
+              <span className={`ml-2 text-xs flex items-center gap-1 ${ratesSource === 'live' ? 'text-emerald-500' : 'text-slate-400'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${ratesSource === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                1 USD = {selectedRegion.symbol}{(rates[selectedRegion.rateKey] ?? 1).toFixed(4)} {selectedRegion.currency} · {ratesSource === 'live' ? 'Live Rates' : 'Default Rates (Offline)'}
               </span>
             )}
           </div>
@@ -629,16 +638,21 @@ export default function MarketplacePage() {
                     >
                       <div className={`relative overflow-hidden bg-gradient-to-br ${theme.brand} px-6 py-6 ${theme.halo}`}>
                         <div className={`absolute inset-0 ${theme.texture}`} />
+                        {card.file_path && (
+                          <div className="absolute inset-0 overflow-hidden">
+                            <img 
+                              src={`${API_BASE}/${card.file_path}`} 
+                              alt={card.retailerName}
+                              className="w-full h-full object-cover opacity-40 mix-blend-overlay"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent" />
+                          </div>
+                        )}
                         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%,rgba(255,255,255,0.06)_72%,transparent)]" />
                         <div className={`relative flex min-h-[220px] flex-col justify-between ${textColor}`}>
-                          <div className="flex items-start justify-between">
                             <div className="rounded-full border border-white/25 bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-inherit backdrop-blur">
                               {theme.eyebrow}
                             </div>
-                            <div className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
-                              Save {discount}%
-                            </div>
-                          </div>
 
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
@@ -653,11 +667,12 @@ export default function MarketplacePage() {
 
                             <div className="flex items-end justify-between">
                               <div>
-                                <div className={`text-xs uppercase tracking-[0.22em] ${subTextColor}`}>Stored value</div>
-                                <div className="mt-1 text-5xl font-semibold leading-none">{formatMoney(card.denomination)}</div>
+                                <div className={`text-xs uppercase tracking-[0.22em] ${subTextColor}`}>Asking Price</div>
+                                <div className="mt-1 text-5xl font-semibold leading-none">${card.sellingPrice.toFixed(0)} <span className="text-2xl">USD</span></div>
+                                <div className={`text-xs mt-1 ${subTextColor}`}>≈ {estimateEth(card.sellingPrice).toFixed(6)} ETH</div>
                               </div>
                               <div className={`rounded-full border border-white/20 px-4 py-2 text-sm font-semibold ${card.retailerId === 'target' ? 'bg-white/70 text-slate-950' : 'bg-black/10 text-white'} backdrop-blur`}>
-                                Digital delivery
+                                Instant Reveal
                               </div>
                             </div>
                           </div>
@@ -688,7 +703,7 @@ export default function MarketplacePage() {
                           </div>
                           <div className="rounded-2xl bg-slate-50 px-3 py-3">
                             <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Balance</div>
-                            <div className="mt-2 font-medium text-slate-900">{formatMoney(card.balance ?? card.denomination)}</div>
+                            <div className="mt-2 font-medium text-slate-900">Verified</div>
                           </div>
                           <div className="rounded-2xl bg-slate-50 px-3 py-3">
                             <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Success</div>
@@ -760,6 +775,16 @@ export default function MarketplacePage() {
             <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
               <div className={`relative overflow-hidden bg-gradient-to-br ${getRetailerTheme(selectedCard.retailerId).brand} p-8 text-white`}>
                 <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailerId).texture}`} />
+                {selectedCard.file_path && (
+                  <div className="absolute inset-0 overflow-hidden">
+                    <img 
+                      src={`${API_BASE}/${selectedCard.file_path}`} 
+                      alt={selectedCard.retailerName}
+                      className="w-full h-full object-cover opacity-40 mix-blend-overlay"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-transparent" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),transparent_42%,rgba(255,255,255,0.06)_72%,transparent)]" />
                 <button
                   onClick={closeCheckout}
@@ -779,14 +804,11 @@ export default function MarketplacePage() {
 
                   <div className="rounded-[28px] border border-white/18 bg-black/10 p-5 backdrop-blur">
                     <div className="text-xs uppercase tracking-[0.22em] text-white/70">Card summary</div>
-                    <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="mt-4 grid grid-cols-1 gap-4">
                       <div>
-                        <div className="text-xs text-white/60">Face value</div>
-                        <div className="mt-1 text-3xl font-semibold">{formatMoney(selectedCard.denomination)}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-white/60">You pay</div>
-                        <div className="mt-1 text-3xl font-semibold">{formatMoney(selectedCard.sellingPrice)}</div>
+                        <div className="text-xs text-white/60">Asking price</div>
+                        <div className="mt-1 text-3xl font-semibold">${selectedCard.sellingPrice.toFixed(2)} USD</div>
+                        <div className="text-xs text-white/40 mt-1">≈ {estimateEth(selectedCard.sellingPrice).toFixed(6)} ETH</div>
                       </div>
                     </div>
                     <div className="mt-4 flex items-center gap-2 text-sm text-white/80">
@@ -892,8 +914,12 @@ export default function MarketplacePage() {
                           <div className="text-xs uppercase tracking-[0.22em] text-slate-400">Order breakdown</div>
                           <div className="mt-3 space-y-2 text-sm text-slate-700">
                             <div className="flex items-center justify-between gap-6">
-                              <span>Gift card price</span>
-                              <span>{formatMoney(selectedCard.sellingPrice)}</span>
+                              <span>Card price (USD)</span>
+                              <span>${selectedCard.sellingPrice.toFixed(2)}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-6 font-bold text-slate-900 border-t border-slate-100 pt-2">
+                              <span>Payment amount</span>
+                              <span>{estimateEth(selectedCard.sellingPrice).toFixed(6)} ETH</span>
                             </div>
                             <div className="flex items-center justify-between gap-6">
                               <span>Network fee</span>

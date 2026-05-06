@@ -31,7 +31,7 @@ export default function AdminDashboard() {
     const fetchCards = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:4000/cards', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cards`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error('Failed to fetch cards');
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     setActionLoading(cardId);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:4000/admin/cards/${cardId}/${action}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/cards/${cardId}/${action}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

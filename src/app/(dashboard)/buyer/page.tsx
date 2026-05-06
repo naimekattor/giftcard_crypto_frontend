@@ -194,7 +194,7 @@ export default function BuyerDashboardPage() {
               { label: 'Total Purchases', value: stats.total, icon: '📦', color: 'from-blue-600 to-blue-800' },
               { label: 'In Escrow', value: stats.holding, icon: '🔐', color: 'from-yellow-600 to-yellow-800' },
               { label: 'Completed', value: stats.completed, icon: '✅', color: 'from-emerald-600 to-emerald-800' },
-              { label: 'Total Spent (ETH)', value: stats.totalSpent.toFixed(6), icon: '⟠', color: 'from-purple-600 to-purple-800' },
+              { label: 'Total Spent ', value: stats.totalSpent.toFixed(6), icon: '⟠', color: 'from-purple-600 to-purple-800' },
             ].map((s) => (
               <div key={s.label} className={`bg-gradient-to-br ${s.color} rounded-2xl p-4 lg:p-5 shadow-xl`}>
                 <div className="text-xl lg:text-2xl mb-1 lg:mb-2">{s.icon}</div>

@@ -18,8 +18,7 @@ const REGIONS = [
 const formSchema = z.object({
   retailer: z.string().min(1, 'Please select a retailer'),
   region: z.string().min(1, 'Please select a region'),
-  value: z.string().min(1, 'Enter card face value'),
-  price: z.string().min(1, 'Enter selling price (ETH)'),
+  price: z.string().min(1, 'Enter asking price'),
   cardCode: z.string().min(5, 'Gift card code is too short'),
   pin: z.string().optional(),
   sellerWallet: z.string().startsWith('0x', 'Enter a valid ETH wallet address (starting with 0x)'),
@@ -46,7 +45,7 @@ export function SellerCardForm() {
   const regionMeta = REGIONS.find(r => r.code === selectedRegion) || REGIONS[1];
 
   const nextStep = async () => {
-    const isValid = await trigger(['retailer', 'region', 'value', 'price', 'cardCode']);
+    const isValid = await trigger(['retailer', 'region', 'price', 'cardCode']);
     if (isValid) setStep(2);
   };
   const prevStep = () => setStep(1);
@@ -62,7 +61,6 @@ export function SellerCardForm() {
     try {
       const formData = new FormData();
       formData.append('retailer', data.retailer);
-      formData.append('value', data.value);
       formData.append('price', data.price);
       formData.append('card_code', data.cardCode);
       formData.append('card_pin', data.pin || '');
@@ -187,36 +185,18 @@ export function SellerCardForm() {
                 {errors.retailer && <p className="text-xs text-red-500 mt-1">{errors.retailer.message}</p>}
               </div>
 
-              {/* Value & Price */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    Face Value ({regionMeta.symbol})
-                  </label>
+                <div className="space-y-2 col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Asking Price ({regionMeta.currency})</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{regionMeta.symbol}</span>
                     <input
-                      type="text" placeholder="e.g. 100"
-                      {...register('value')}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  {errors.value && <p className="text-xs text-red-500 mt-1">{errors.value.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Asking Price (ETH)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">⟠</span>
-                    <input
-                      type="text" placeholder="e.g. 0.05"
+                      type="text" placeholder={`e.g. ${regionMeta.currency === 'GBP' ? '40' : '50'}`}
                       {...register('price')}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price.message}</p>}
                 </div>
-              </div>
 
               {/* Upload */}
               <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 text-center group hover:border-blue-400 transition-colors">
