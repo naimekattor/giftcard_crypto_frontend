@@ -71,7 +71,8 @@ export const buyerApi = {
   buyCard: (token: string, cardId: number, walletAddress?: string) =>
     authFetch<{ 
       payment_id: number; 
-      amount: number; 
+      amount?: number;
+      eth_amount?: number;
       pay_to: string; 
       asset: string;
     }>(

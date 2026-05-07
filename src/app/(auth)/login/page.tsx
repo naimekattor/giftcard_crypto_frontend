@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useLogin } from '@/features/auth/hooks/useAuth';
 import Image from 'next/image';
 
-export default function LoginPage() {
+function LoginPageInner() {
   const { mutate: login, isPending } = useLogin();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
@@ -109,5 +109,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

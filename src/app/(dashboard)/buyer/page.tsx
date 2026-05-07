@@ -29,6 +29,7 @@ export default function BuyerDashboardPage() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [revealed, setRevealed] = useState<Record<number, boolean>>({});
 
   const showToast = (msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
@@ -55,11 +56,11 @@ export default function BuyerDashboardPage() {
 
   const handleComplain = async (id: number) => {
     if (!user) return;
-    if (!confirm('File a complaint? This will trigger an automatic refund.')) return;
+    if (!confirm('File a complaint? This will hold the seller payout for admin review.')) return;
     setActionLoading(id);
     try {
       await buyerApi.complain(user.token, id);
-      showToast('Complaint filed. Refund is being processed.', 'success');
+      showToast('Complaint filed. Seller payout is held for admin review.', 'success');
       load();
     } catch (e: any) {
       showToast(e.message, 'error');
@@ -79,6 +80,23 @@ export default function BuyerDashboardPage() {
       showToast(e.message, 'error');
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const canViewDetails = (p: PaymentRecord) =>
+    ['holding', 'completed'].includes(p.status) &&
+    Boolean(p.card?.card_code || p.card?.card_pin);
+
+  const toggleReveal = (paymentId: number) =>
+    setRevealed((prev) => ({ ...prev, [paymentId]: !prev[paymentId] }));
+
+  const copy = async (value?: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      showToast('Copied to clipboard', 'success');
+    } catch {
+      showToast('Copy failed', 'error');
     }
   };
 
@@ -248,6 +266,48 @@ export default function BuyerDashboardPage() {
                               <div>
                                 <p className="font-semibold text-white text-sm">{p.card?.name || `Card #${p.card_id}`}</p>
                                 <p className="text-xs text-slate-500 mt-0.5">{p.card?.retailer}</p>
+                                {canViewDetails(p) && (
+                                  <div className="mt-2">
+                                    <button
+                                      onClick={() => toggleReveal(p.id)}
+                                      className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                                    >
+                                      {revealed[p.id] ? 'Hide card details' : 'View card details'}
+                                    </button>
+                                    {revealed[p.id] && (
+                                      <div className="mt-2 grid gap-2 text-xs">
+                                        {p.card?.card_code && (
+                                          <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                            <div className="min-w-0">
+                                              <p className="text-slate-500">Code</p>
+                                              <p className="text-slate-200 font-mono truncate">{p.card.card_code}</p>
+                                            </div>
+                                            <button
+                                              onClick={() => copy(p.card?.card_code)}
+                                              className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                            >
+                                              Copy
+                                            </button>
+                                          </div>
+                                        )}
+                                        {p.card?.card_pin && (
+                                          <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                            <div className="min-w-0">
+                                              <p className="text-slate-500">PIN</p>
+                                              <p className="text-slate-200 font-mono truncate">{p.card.card_pin}</p>
+                                            </div>
+                                            <button
+                                              onClick={() => copy(p.card?.card_pin)}
+                                              className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                            >
+                                              Copy
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </td>
                             <td className="px-4 lg:px-6 py-4 text-sm font-mono text-slate-300 whitespace-nowrap">{p.amount.toFixed(6)}</td>
@@ -265,7 +325,7 @@ export default function BuyerDashboardPage() {
                               {p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : '—'}
                             </td>
                             <td className="px-4 lg:px-6 py-4">
-                              {['holding', 'completed'].includes(p.status) && p.complaint_status === 'none' && (
+                              {['holding', 'completed'].includes(p.status) && p.complaint_status !== 'valid' && (
                                 <div className="flex gap-2 flex-wrap">
                                   <button
                                     id={`confirm-${p.id}`}
@@ -275,14 +335,16 @@ export default function BuyerDashboardPage() {
                                   >
                                     {actionLoading === p.id ? '…' : '✓ Confirm'}
                                   </button>
-                                  <button
-                                    id={`complain-${p.id}`}
-                                    disabled={actionLoading === p.id}
-                                    onClick={() => handleComplain(p.id)}
-                                    className="px-3 py-1.5 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg text-xs font-semibold border border-orange-500/20 transition-all disabled:opacity-50 whitespace-nowrap"
-                                  >
-                                    {actionLoading === p.id ? '…' : '⚠ Complain'}
-                                  </button>
+                                  {p.complaint_status === 'none' && (
+                                    <button
+                                      id={`complain-${p.id}`}
+                                      disabled={actionLoading === p.id}
+                                      onClick={() => handleComplain(p.id)}
+                                      className="px-3 py-1.5 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg text-xs font-semibold border border-orange-500/20 transition-all disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                      {actionLoading === p.id ? '…' : '⚠ Complain'}
+                                    </button>
+                                  )}
                                 </div>
                               )}
                               {p.complaint_status !== 'none' && (
@@ -303,6 +365,48 @@ export default function BuyerDashboardPage() {
                           <div className="flex-1">
                             <p className="font-semibold text-white text-sm">{p.card?.name || `Card #${p.card_id}`}</p>
                             <p className="text-xs text-slate-500 mt-1">{p.card?.retailer}</p>
+                            {canViewDetails(p) && (
+                              <div className="mt-2">
+                                <button
+                                  onClick={() => toggleReveal(p.id)}
+                                  className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                                >
+                                  {revealed[p.id] ? 'Hide card details' : 'View card details'}
+                                </button>
+                                {revealed[p.id] && (
+                                  <div className="mt-2 grid gap-2 text-xs">
+                                    {p.card?.card_code && (
+                                      <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                        <div className="min-w-0">
+                                          <p className="text-slate-500">Code</p>
+                                          <p className="text-slate-200 font-mono truncate">{p.card.card_code}</p>
+                                        </div>
+                                        <button
+                                          onClick={() => copy(p.card?.card_code)}
+                                          className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                        >
+                                          Copy
+                                        </button>
+                                      </div>
+                                    )}
+                                    {p.card?.card_pin && (
+                                      <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                        <div className="min-w-0">
+                                          <p className="text-slate-500">PIN</p>
+                                          <p className="text-slate-200 font-mono truncate">{p.card.card_pin}</p>
+                                        </div>
+                                        <button
+                                          onClick={() => copy(p.card?.card_pin)}
+                                          className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                        >
+                                          Copy
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold border whitespace-nowrap ml-2 flex-shrink-0 ${statusColors[p.status] || statusColors.pending}`}>
                             {p.status}
@@ -326,7 +430,7 @@ export default function BuyerDashboardPage() {
                             </p>
                           </div>
                         </div>
-                        {['holding', 'completed'].includes(p.status) && p.complaint_status === 'none' && (
+                        {['holding', 'completed'].includes(p.status) && p.complaint_status !== 'valid' && (
                           <div className="flex gap-2 flex-col">
                             <button
                               id={`confirm-${p.id}`}
@@ -336,14 +440,16 @@ export default function BuyerDashboardPage() {
                             >
                               {actionLoading === p.id ? 'Confirming…' : '✓ Confirm'}
                             </button>
-                            <button
-                              id={`complain-${p.id}`}
-                              disabled={actionLoading === p.id}
-                              onClick={() => handleComplain(p.id)}
-                              className="w-full px-3 py-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg text-xs font-semibold border border-orange-500/20 transition-all disabled:opacity-50"
-                            >
-                              {actionLoading === p.id ? 'Filing…' : '⚠ File Complaint'}
-                            </button>
+                            {p.complaint_status === 'none' && (
+                              <button
+                                id={`complain-${p.id}`}
+                                disabled={actionLoading === p.id}
+                                onClick={() => handleComplain(p.id)}
+                                className="w-full px-3 py-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg text-xs font-semibold border border-orange-500/20 transition-all disabled:opacity-50"
+                              >
+                                {actionLoading === p.id ? 'Filing…' : '⚠ File Complaint'}
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>

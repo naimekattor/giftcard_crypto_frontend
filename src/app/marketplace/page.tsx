@@ -24,7 +24,7 @@ import {
 import { ethers } from 'ethers';
 import Swal from 'sweetalert2';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { buyerApi } from '@/services/dashboardApi';
+import { buyerApi, type CardRecord } from '@/services/dashboardApi';
 
 const REGIONS = [
   { code: 'USA', flag: '🇺🇸', label: 'USD', currency: 'USD', rateKey: 'USD', symbol: '$' },
@@ -388,13 +388,27 @@ export default function MarketplacePage() {
       setPaymentStep('paying');
       // Step 1: POST /buy
       const intent = await buyerApi.buyCard(user.token, Number(selectedCard.id), address);
+      
+      const intentAmount = intent?.amount ?? intent?.eth_amount;
+
+      // Validate intent response
+      if (!intent || !intent.payment_id || !intentAmount || !intent.pay_to) {
+        throw new Error('Invalid payment intent: missing required fields (payment_id, amount, or pay_to)');
+      }
+      
       setActivePaymentId(intent.payment_id);
 
       // Step 2: MetaMask Transaction
       const signer = await provider.getSigner();
+      const amountStr = String(intentAmount);
+      
+      if (!amountStr || amountStr === 'undefined' || amountStr === 'null') {
+        throw new Error('Invalid payment amount received from server');
+      }
+      
       const tx = await signer.sendTransaction({
         to: intent.pay_to,
-        value: ethers.parseEther(intent.amount.toString()),
+        value: ethers.parseEther(amountStr),
       });
 
       setTxHash(tx.hash);
@@ -404,9 +418,12 @@ export default function MarketplacePage() {
       setPolling(true);
 
     } catch (e: any) {
-      console.error(e);
+      console.error('Payment error:', e);
       let msg = e.message || 'Something went wrong';
       if (e.code === 'ACTION_REJECTED') msg = 'Transaction rejected in MetaMask.';
+      if (msg.includes('undefined') || msg.includes('null')) {
+        msg = 'Payment server error: incomplete payment data. Please try again.';
+      }
       
       Swal.fire({
         title: 'Payment Error',
@@ -510,8 +527,8 @@ export default function MarketplacePage() {
 
                       <div className="flex items-end justify-between">
                         <div>
-                          <div className="text-xs uppercase tracking-[0.22em] text-white/70">Price (ETH)</div>
-                          <div className="mt-1 text-4xl font-semibold">{card.sellingPrice.toFixed(4)} ETH</div>
+                          <div className="text-xs uppercase tracking-[0.22em] text-white/70">Price </div>
+                          <div className="mt-1 text-4xl font-semibold">{card.sellingPrice} </div>
                         </div>
                         <div className="rounded-full border border-white/20 bg-black/10 px-4 py-2 text-sm font-medium backdrop-blur">
                           Instant reveal
