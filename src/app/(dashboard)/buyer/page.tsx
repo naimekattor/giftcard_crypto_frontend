@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth, useLogout } from '@/features/auth/hooks/useAuth';
 import { buyerApi, type PaymentRecord } from '@/services/dashboardApi';
 import Image from 'next/image';
+import Swal from 'sweetalert2';
 
 const statusColors: Record<string, string> = {
   pending:   'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
@@ -56,14 +57,60 @@ export default function BuyerDashboardPage() {
 
   const handleComplain = async (id: number) => {
     if (!user) return;
-    if (!confirm('File a complaint? This will hold the seller payout for admin review.')) return;
+    
+    const { value: reason } = await Swal.fire({
+      title: 'File a complaint?',
+      text: 'Please select a reason for your dispute. This will hold the seller payout for admin review.',
+      icon: 'warning',
+      input: 'select',
+      inputOptions: {
+        'Invalid gift card': 'Invalid gift card',
+        'Already redeemed': 'Already redeemed',
+        'Wrong balance': 'Wrong balance',
+        'Used card': 'Used card',
+        'Seller fraud': 'Seller fraud',
+        'Other issue': 'Other issue'
+      },
+      inputPlaceholder: 'Select a reason',
+      showCancelButton: true,
+      confirmButtonColor: '#f97316',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Submit Dispute',
+      background: '#0f172a',
+      color: '#fff',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+      },
+      inputValidator: (value) => {
+        if (!value) {
+          return 'You need to select a reason!';
+        }
+      }
+    });
+
+    if (!reason) return;
+
     setActionLoading(id);
     try {
-      await buyerApi.complain(user.token, id);
-      showToast('Complaint filed. Seller payout is held for admin review.', 'success');
+      await buyerApi.complain(user.token, id, reason);
+      
+      Swal.fire({
+        title: 'Dispute Filed!',
+        text: 'Seller payout is held for admin review.',
+        icon: 'success',
+        background: '#0f172a',
+        color: '#fff',
+        confirmButtonColor: '#3b82f6',
+      });
       load();
     } catch (e: any) {
-      showToast(e.message, 'error');
+      Swal.fire({
+        title: 'Error',
+        text: e.message,
+        icon: 'error',
+        background: '#0f172a',
+        color: '#fff',
+      });
     } finally {
       setActionLoading(null);
     }
@@ -71,13 +118,44 @@ export default function BuyerDashboardPage() {
 
   const handleConfirm = async (id: number) => {
     if (!user) return;
+
+    const result = await Swal.fire({
+      title: 'Confirm Card Validity?',
+      text: 'Once confirmed, funds will be released to the seller.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981', // emerald-500
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Yes, it works!',
+      background: '#0f172a',
+      color: '#fff',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setActionLoading(id);
     try {
       await buyerApi.confirm(user.token, id);
-      showToast('Gift card confirmed as valid!', 'success');
+      Swal.fire({
+        title: 'Success!',
+        text: 'Gift card confirmed as valid!',
+        icon: 'success',
+        background: '#0f172a',
+        color: '#fff',
+        confirmButtonColor: '#3b82f6',
+      });
       load();
     } catch (e: any) {
-      showToast(e.message, 'error');
+      Swal.fire({
+        title: 'Error',
+        text: e.message,
+        icon: 'error',
+        background: '#0f172a',
+        color: '#fff',
+      });
     } finally {
       setActionLoading(null);
     }

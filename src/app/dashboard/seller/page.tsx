@@ -122,7 +122,7 @@ export default function SellerDashboardPage() {
     active: cards.filter((c) => c.status === 'active').length,
     sold: cards.filter((c) => c.status === 'sold').length,
     cancelled: cards.filter((c) => c.status === 'cancelled').length,
-    totalEarnings: cards.filter((c) => c.status === 'sold').reduce((s, c) => s + (c.price || 0), 0),
+    totalEarnings: cards.filter((c) => c.status === 'sold').reduce((s, c) => s + (c.payment?.seller_payout_amount || 0), 0),
   };
 
   if (authLoading) {
@@ -267,7 +267,7 @@ export default function SellerDashboardPage() {
               { label: 'Total Listings', value: stats.total, icon: '📋' },
               { label: 'Active', value: stats.active, icon: '🟢' },
               { label: 'Sold', value: stats.sold, icon: '🔵' },
-              { label: 'Earned', value: stats.totalEarnings.toFixed(6), icon: '⟠' },
+              { label: 'Total Earned (ETH)', value: stats.totalEarnings.toFixed(6), icon: '⟠' },
             ].map((s) => (
               <div key={s.label} className="bg-white/5 rounded-2xl p-4 lg:p-5 shadow-xl border border-white/5">
                 <div className="text-xl lg:text-2xl mb-1 lg:mb-2">{s.icon}</div>
@@ -304,7 +304,7 @@ export default function SellerDashboardPage() {
                 <table className="w-full min-w-[640px]">
                   <thead>
                     <tr className="border-b border-white/5">
-                      {['Card', 'Region', 'Asking Price', 'Status', 'Actions'].map((h) => (
+                      {['Card', 'Region', 'Asking Price', 'Payout (ETH)', 'Status', 'Actions'].map((h) => (
                         <th
                           key={h}
                           className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap"
@@ -342,9 +342,12 @@ export default function SellerDashboardPage() {
                           </td>
 
                           <td className="px-4 lg:px-6 py-4 text-sm text-slate-300 whitespace-nowrap">{card.region}</td>
-                          <td className="px-4 lg:px-6 py-4 text-sm font-mono text-white whitespace-nowrap">
+                          <td className="px-4 lg:px-6 py-4 text-sm font-mono text-slate-400 whitespace-nowrap">
                             {sym}
                             {card.price}
+                          </td>
+                          <td className="px-4 lg:px-6 py-4 text-sm font-mono text-white whitespace-nowrap">
+                            {card.payment?.seller_payout_amount ? `${card.payment.seller_payout_amount.toFixed(6)} ETH` : '—'}
                           </td>
 
                           <td className="px-4 lg:px-6 py-4">

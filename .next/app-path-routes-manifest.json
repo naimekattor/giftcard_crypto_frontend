@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/(auth)/login/page": "/login",
+  "/dashboard/buyer/page": "/dashboard/buyer",
+  "/(auth)/signup/page": "/signup",
+  "/dashboard/seller/page": "/dashboard/seller",
+  "/page": "/",
+  "/marketplace/page": "/marketplace",
+  "/seller/page": "/seller",
+  "/(dashboard)/admin/page": "/admin",
+  "/(dashboard)/buyer/page": "/buyer"
+}

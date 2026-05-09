@@ -36,6 +36,7 @@ export interface CardRecord {
   card_code?: string;
   card_pin?: string;
   file_path?: string;
+  payment?: PaymentRecord;
 }
 
 export interface PaymentRecord {
@@ -47,6 +48,7 @@ export interface PaymentRecord {
   external_id?: string;
   created_at?: string;
   card?: CardRecord;
+  seller_payout_amount?: number;
 }
 
 // ── Buyer ────────────────────────────────────────────────────────────────────
@@ -54,11 +56,14 @@ export const buyerApi = {
   getPayments: (token: string) =>
     authFetch<PaymentRecord[]>('/buyer/payments', token),
 
-  complain: (token: string, paymentId: number) =>
+  complain: (token: string, paymentId: number, reason: string) =>
     authFetch<{ message: string; refund_tx_hash?: string }>(
       `/buyer/payments/${paymentId}/complain`,
       token,
-      { method: 'POST' }
+      { 
+        method: 'POST',
+        body: JSON.stringify({ reason })
+      }
     ),
 
   confirm: (token: string, paymentId: number) =>
