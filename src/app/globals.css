@@ -59,3 +59,27 @@
   border-color: var(--color-brand);
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
+
+/* SweetAlert Dark Theme Fixes */
+.swal2-popup {
+  font-family: inherit !important;
+}
+
+.swal2-select {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0.75rem !important;
+  padding: 10px !important;
+  font-size: 0.875rem !important;
+}
+
+.swal2-select option {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+.swal2-input:focus, .swal2-select:focus, .swal2-textarea:focus {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2) !important;
+}
