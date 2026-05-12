@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useBrowseCards } from '@/features/marketplace/hooks/useMarketplace';
 import type { GiftCardListing } from '@/types';
+import Link from "next/link";
 import {
   ArrowRight,
   Bitcoin,
@@ -779,9 +780,11 @@ export default function MarketplacePage() {
                 </p>
               </div>
             </div>
+            <Link href={"/seller"}>
             <button className="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800">
               List a card
             </button>
+            </Link>
           </div>
         </section>
       </div>

@@ -1,7 +1,5 @@
 {
-  "/dashboard/buyer/page": "app/dashboard/buyer/page.js",
+  "/page": "app/page.js",
   "/marketplace/page": "app/marketplace/page.js",
-  "/dashboard/seller/page": "app/dashboard/seller/page.js",
-  "/seller/page": "app/seller/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js"
+  "/seller/page": "app/seller/page.js"
 }

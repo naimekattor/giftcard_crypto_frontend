@@ -304,7 +304,7 @@ export default function SellerDashboardPage() {
                 <table className="w-full min-w-[640px]">
                   <thead>
                     <tr className="border-b border-white/5">
-                      {['Card', 'Region', 'Asking Price', 'Payout (ETH)', 'Status', 'Actions'].map((h) => (
+                      {['Card', 'Region', 'Gift card Price', 'Payout (ETH)', 'Status', 'Actions'].map((h) => (
                         <th
                           key={h}
                           className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap"
