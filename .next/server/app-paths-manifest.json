@@ -1,5 +1,9 @@
 {
-  "/page": "app/page.js",
+  "/(auth)/verify-email/page": "app/(auth)/verify-email/page.js",
+  "/(auth)/signup/page": "app/(auth)/signup/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/dashboard/buyer/page": "app/dashboard/buyer/page.js",
   "/marketplace/page": "app/marketplace/page.js",
+  "/dashboard/seller/page": "app/dashboard/seller/page.js",
   "/seller/page": "app/seller/page.js"
 }

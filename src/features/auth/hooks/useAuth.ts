@@ -29,11 +29,57 @@ export function useRegister() {
   return useMutation({
     mutationFn: async (payload: RegisterPayload) => {
       await authService.register(payload);
-      // After registration redirect to login
-      return payload.role;
+      return payload.email;
+    },
+    onSuccess: (email) => {
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    },
+  });
+}
+
+export function useVerifyEmail() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async ({ email, code }: { email: string; code: string }) => {
+      return authService.verifyEmail(email, code);
     },
     onSuccess: () => {
       router.push('/login?registered=true');
+    },
+  });
+}
+
+export function useResendVerification() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      return authService.resendVerification(email);
+    },
+  });
+}
+
+export function useForgotPassword() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (email: string) => {
+      return authService.forgotPassword(email);
+    },
+    onSuccess: (_, email) => {
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+    },
+  });
+}
+
+export function useResetPassword() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (payload: { email: string; code: string; newPassword: string }) => {
+      return authService.resetPassword(payload);
+    },
+    onSuccess: () => {
+      router.push('/login?reset=true');
     },
   });
 }

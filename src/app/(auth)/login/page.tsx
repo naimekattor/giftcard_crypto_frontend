@@ -10,6 +10,7 @@ function LoginPageInner() {
   const { mutate: login, isPending } = useLogin();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
+  const reset = searchParams.get('reset');
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
@@ -44,13 +45,26 @@ function LoginPageInner() {
 
           {registered && (
             <div className="mb-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl px-4 py-3 text-sm font-medium">
-              ✓ Account created! Please log in.
+              ✓ Email verified! Please log in.
+            </div>
+          )}
+
+          {reset && (
+            <div className="mb-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl px-4 py-3 text-sm font-medium">
+              ✓ Password reset! Please log in with your new password.
             </div>
           )}
 
           {error && (
             <div className="mb-5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm font-medium">
-              {error}
+              {error === 'unverified' ? (
+                <span>
+                  Your email is not verified.{' '}
+                  <Link href={`/verify-email?email=${encodeURIComponent(form.email)}`} className="underline font-bold hover:text-red-300">
+                    Verify now
+                  </Link>
+                </span>
+              ) : error}
             </div>
           )}
 
@@ -69,7 +83,12 @@ function LoginPageInner() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-300">Password</label>
+                <Link href="/forgot-password" id="forgot-password-link" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 id="login-password"
                 type="password"

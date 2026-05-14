@@ -33,4 +33,32 @@ export const authService = {
       body: JSON.stringify(payload),
     });
   },
+
+  async verifyEmail(email: string, code: string): Promise<{ message: string }> {
+    return request('/auth/verify', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+  },
+
+  async resendVerification(email: string): Promise<{ message: string }> {
+    return request('/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  async resetPassword(payload: { email: string; code: string; newPassword: string }): Promise<{ message: string }> {
+    return request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };
