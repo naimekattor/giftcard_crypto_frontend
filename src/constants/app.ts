@@ -53,7 +53,7 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   SIGNUP: '/signup',
-  MARKETPLACE: '/marketplace',
+  MARKETPLACE: '/buy-gift-cards',
   DASHBOARD_BUYER: '/buyer/dashboard',
   DASHBOARD_SELLER: '/seller/dashboard',
   DASHBOARD_ADMIN: '/admin/dashboard',

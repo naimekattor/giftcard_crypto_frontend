@@ -190,7 +190,7 @@ export default function SellerDashboardPage() {
           </Link>
 
           <Link
-            href="/marketplace"
+            href="/buy-gift-cards"
             onClick={() => setSidebarOpen(false)}
             className="text-slate-400 hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 flex items-center gap-3 text-sm transition-all"
           >

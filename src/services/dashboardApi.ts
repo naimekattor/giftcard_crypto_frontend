@@ -81,7 +81,7 @@ export const buyerApi = {
       pay_to: string; 
       asset: string;
     }>(
-      '/buy',
+      '/buyer/buy',
       token,
       { 
         method: 'POST',

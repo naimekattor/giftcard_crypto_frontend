@@ -79,7 +79,7 @@ export const GiftCardCard: React.FC<GiftCardCardProps> = ({ card, onBuy }) => {
 
       <CardFooter className="mt-auto">
         {card.status === 'listed' ? (
-          <Link href={`/marketplace/${card.id}`} className="w-full">
+          <Link href={`/buy-gift-cards/${card.id}`} className="w-full">
             <Button fullWidth>View Details</Button>
           </Link>
         ) : (

@@ -29,11 +29,16 @@ export const marketplaceService = {
         id: String(card.id),
         retailerId: card.retailer ? card.retailer.toLowerCase().replace(/ /g, '-') : 'unknown',
         retailerName: card.retailer || 'Unknown Retailer',
+        retailer: card.retailer, // compatibility with page.tsx
         denomination: card.denomination || card.price,
         sellingPrice: card.price,
-        condition: 'new', // Default for now
+        price: card.price, // compatibility with page.tsx
+        condition: 'new',
         status: card.status,
-        createdAt: new Date().toISOString(), // Backend doesn't return this yet
+        region: card.region,
+        currency: card.currency,
+        seller_asking_price: card.seller_asking_price,
+        createdAt: new Date().toISOString(),
         description: card.description,
         sellerId: 'anonymous',
         seller: {

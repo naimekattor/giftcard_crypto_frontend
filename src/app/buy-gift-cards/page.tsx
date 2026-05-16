@@ -1,0 +1,687 @@
+'use client';
+
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useBrowseCards } from '@/features/marketplace/hooks/useMarketplace';
+import type { GiftCardListing } from '@/types';
+import Link from "next/link";
+import {
+  ArrowRight,
+  Bitcoin,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  CircleDollarSign,
+  Copy,
+  Globe,
+  Wallet,
+  X,
+  ExternalLink,
+  Loader2,
+  Sparkles ,
+  Search ,
+  Tag ,
+  ShieldCheck ,
+  ChevronDown,
+  AlertTriangle,
+  Lock
+} from 'lucide-react';
+import { ethers } from 'ethers';
+import Swal from 'sweetalert2';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { buyerApi, type CardRecord } from '@/services/dashboardApi';
+import { RecaptchaField } from '@/components/shared/RecaptchaField';
+
+const REGIONS = [
+  { code: 'USA', flag: '🇺🇸', label: 'United States', currency: 'USD', rateKey: 'USD', symbol: '$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE USA' },
+  { code: 'UK',  flag: '🇬🇧', label: 'United Kingdom', currency: 'GBP', rateKey: 'GBP', symbol: '£', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE UK' },
+  { code: 'Canada',  flag: '🇨🇦', label: 'Canada', currency: 'CAD', rateKey: 'CAD', symbol: 'CA$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN CANADA' },
+];
+
+const RETAILERS_BY_REGION: Record<string, string[]> = {
+  USA: ['Amazon', 'Nike', 'Uber', 'DICK’S SPORTING GOODS', 'Steam', 'Door Dash', 'AMC', 'Best Buy', 'PlayStation', 'Xbox', 'Costco'],
+  Canada: ['Amazon'],
+  UK: ['Uber', 'Currys', 'John Lewis', 'Apple', 'Deliveroo', 'Just Eat', 'Halfords', 'ASDA', 'PlayStation'],
+};
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+type PaymentStep = 'idle' | 'captcha' | 'connecting' | 'paying' | 'confirming' | 'success';
+
+type CryptoMethod = {
+  id: string;
+  symbol: string;
+  accent: string;
+  label: string;
+  network: string;
+  rate: number;
+  wallet: string;
+  eta: string;
+};
+
+const cryptoMethods: CryptoMethod[] = [
+  {
+    id: 'eth-sepolia',
+    symbol: 'ETH',
+    accent: '#627EEA',
+    label: 'Ethereum',
+    network: 'Sepolia',
+    rate: 2650.0,
+    wallet: 'MetaMask Required',
+    eta: '~30s',
+  },
+];
+
+const retailerThemes: Record<
+  string,
+  {
+    brand: string;
+    eyebrow: string;
+    texture: string;
+    halo: string;
+    icon: string;
+  }
+> = {
+  amazon: {
+    brand: 'from-[#131921] via-[#232f3e] to-[#37475a]',
+    eyebrow: 'Everyday essentials',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,153,0,0.35),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(13,25,33,0.35)]',
+    icon: 'a',
+  },
+  nike: {
+    brand: 'from-[#111] via-[#333] to-[#555]',
+    eyebrow: 'Just do it',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(0,0,0,0.35)]',
+    icon: 'n',
+  },
+  uber: {
+    brand: 'from-[#000] via-[#333] to-[#06c167]',
+    eyebrow: 'Ride & Eat',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(6,193,103,0.3),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(0,0,0,0.35)]',
+    icon: 'u',
+  },
+  currys: {
+    brand: 'from-[#4e148c] via-[#6a1b9a] to-[#8e24aa]',
+    eyebrow: 'Electronics',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(78,20,140,0.35)]',
+    icon: 'c',
+  },
+  'john-lewis': {
+    brand: 'from-[#333] via-[#444] to-[#000]',
+    eyebrow: 'Quality Home',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(0,0,0,0.35)]',
+    icon: 'j',
+  },
+  apple: {
+    brand: 'from-[#000] via-[#333] to-[#999]',
+    eyebrow: 'Apps & Media',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.2),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(0,0,0,0.35)]',
+    icon: 'a',
+  },
+  deliveroo: {
+    brand: 'from-[#00ccbc] via-[#00b2a9] to-[#008f8a]',
+    eyebrow: 'Food Delivery',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.2),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(0,204,188,0.35)]',
+    icon: 'd',
+  },
+  'just-eat': {
+    brand: 'from-[#f36e21] via-[#d05d1c] to-[#b04b15]',
+    eyebrow: 'Order Food',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.2),_transparent_40%)]',
+    halo: 'shadow-[0_24px_50px_rgba(243,110,33,0.35)]',
+    icon: 'j',
+  },
+  playstation: {
+    brand: 'from-[#002f6c] via-[#0057d8] to-[#1d9bf0]',
+    eyebrow: 'Console wallet',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.24),_transparent_35%)]',
+    halo: 'shadow-[0_24px_50px_rgba(0,87,216,0.3)]',
+    icon: 'p',
+  },
+  steam: {
+    brand: 'from-[#091a2c] via-[#0f3b67] to-[#1b73ba]',
+    eyebrow: 'Gaming wallet',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_35%)]',
+    halo: 'shadow-[0_24px_50px_rgba(11,42,77,0.35)]',
+    icon: 's',
+  },
+  xbox: {
+    brand: 'from-[#0b2b1a] via-[#107c10] to-[#7fba00]',
+    eyebrow: 'Game access',
+    texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.24),_transparent_35%)]',
+    halo: 'shadow-[0_24px_50px_rgba(16,124,16,0.28)]',
+    icon: 'x',
+  },
+};
+
+const defaultTheme = {
+  brand: 'from-[#0f172a] via-[#1e293b] to-[#334155]',
+  eyebrow: 'Verified Card',
+  texture: 'bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_35%)]',
+  halo: 'shadow-[0_24px_50px_rgba(15,23,42,0.28)]',
+  icon: 'g',
+};
+
+function getRetailerTheme(retailerName: string) {
+  const slug = retailerName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  return retailerThemes[slug] ?? defaultTheme;
+}
+
+export default function BuyGiftCardsPage() {
+  const [filters, setFilters] = useState({ page: 1, limit: 24 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('featured');
+  const [selectedCard, setSelectedCard] = useState<GiftCardListing | null>(null);
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
+  const [selectedCrypto, setSelectedCrypto] = useState<CryptoMethod>(cryptoMethods[0]);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const { user, isAuthenticated } = useAuth();
+  const { data: cardsData, isLoading } = useBrowseCards(filters);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [activePaymentId, setActivePaymentId] = useState<number | null>(null);
+  const [polling, setPolling] = useState(false);
+  const [purchasedCard, setPurchasedCard] = useState<CardRecord | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [pinCopied, setPinCopied] = useState(false);
+
+  // ── Region / Currency Switcher ───────────────────────────────────────
+  const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
+  const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
+  const [ratesLoading, setRatesLoading] = useState(true);
+
+  const fetchRates = useCallback(async () => {
+    setRatesLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/exchange-rates`);
+      if (res.ok) {
+        const data = await res.json();
+        setRates({ 
+          USD: data.USD ?? 1, 
+          GBP: data.GBP ?? 0.79, 
+          CAD: data.CAD ?? 1.36,
+          ETH: data.ETH ?? 2650
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching rates:', err);
+    } finally { setRatesLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchRates(); }, [fetchRates]);
+
+  const formatRegionMoney = (fiatPrice: number, currency: string) => {
+    const symbol = REGIONS.find(r => r.currency === currency)?.symbol || '$';
+    return `${symbol}${fiatPrice.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const estimateEth = (fiatPrice: number, currency: string) => {
+    const rateToUsd = rates[currency] || 1;
+    const priceInUsd = fiatPrice / rateToUsd;
+    const ethPriceInUsd = rates.ETH || 2650;
+    return priceInUsd / ethPriceInUsd;
+  };
+  // ────────────────────────────────────────────────────────────────────────
+
+  const filteredCards = useMemo(() => {
+    const baseCards = cardsData?.data ?? [];
+    return baseCards.filter((card) => {
+      const matchesRegion = card.region === selectedRegion.code;
+      
+      const searchValue = searchQuery.trim().toLowerCase();
+      const matchesSearch = !searchValue || 
+        card.retailer.toLowerCase().includes(searchValue) ||
+        card.name.toLowerCase().includes(searchValue);
+
+      return matchesRegion && matchesSearch;
+    });
+  }, [cardsData, selectedRegion, searchQuery]);
+
+  const sortedCards = useMemo(() => {
+    return [...filteredCards].sort((a, b) => {
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [filteredCards, sortBy]);
+
+  const openCheckout = (card: GiftCardListing) => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        title: 'Login Required',
+        text: 'Please log in to purchase gift cards.',
+        icon: 'info',
+        confirmButtonText: 'Login',
+        showCancelButton: true,
+        confirmButtonColor: '#0f172a'
+      }).then((result) => {
+        if (result.isConfirmed) window.location.href = '/login';
+      });
+      return;
+    }
+    setSelectedCard(card);
+    setPaymentStep('captcha');
+    setCaptchaToken(null);
+  };
+
+  const handleCaptchaVerify = (token: string | null) => {
+    setCaptchaToken(token);
+    if (token) setPaymentStep('idle');
+  };
+
+  const handlePayment = async () => {
+    if (!selectedCard || !user || !captchaToken) return;
+
+    setPaymentStep('connecting');
+    try {
+      if (typeof window === 'undefined' || !(window as any).ethereum) {
+        throw new Error('MetaMask not detected.');
+      }
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      
+      // Request chain switch to Sepolia
+      try {
+        await (window as any).ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0xaa36a7' }], 
+        });
+      } catch (e) {}
+
+      const accounts = await provider.send("eth_requestAccounts", []);
+      const address = accounts[0];
+      
+      setPaymentStep('paying');
+      const intent = await buyerApi.buyCard(user.token, Number(selectedCard.id), address);
+      
+      const signer = await provider.getSigner();
+      const tx = await signer.sendTransaction({
+        to: intent.pay_to,
+        value: ethers.parseEther(String(intent.eth_amount)),
+      });
+
+      setTxHash(tx.hash);
+      setActivePaymentId(intent.payment_id);
+      setPaymentStep('confirming');
+      setPolling(true);
+
+    } catch (e: any) {
+      console.error('Payment error:', e);
+      Swal.fire('Payment Error', e.message || 'Transaction failed', 'error');
+      setPaymentStep('idle');
+    }
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (polling && user && activePaymentId) {
+      interval = setInterval(async () => {
+        try {
+          const payments = await buyerApi.getPayments(user.token);
+          const current = payments.find(p => p.id === activePaymentId);
+          if (current && ['holding', 'completed'].includes(current.status)) {
+            setPolling(false);
+            setPurchasedCard(current.card || null);
+            setPaymentStep('success');
+            Swal.fire('Confirmed!', 'Your payment was successful.', 'success');
+          }
+        } catch (e) {}
+      }, 4000);
+    }
+    return () => clearInterval(interval);
+  }, [polling, user, activePaymentId]);
+
+  return (
+    <div className="min-h-screen bg-[#fcfaf7] text-slate-900 pb-20">
+      {/* Hero Section */}
+      <div className="bg-slate-950 text-white pt-20 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand/10 border border-brand/20 mb-8">
+              <Sparkles className="w-4 h-4 text-brand animate-pulse" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-brand">Premium Marketplace</span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">Buy <span className="text-brand">Gift Cards</span> with Crypto</h1>
+            <p className="text-xl text-slate-400 max-w-2xl leading-relaxed">
+              Fast delivery, verified balances, and complete anonymity.
+              Choose from major retailers across the globe.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+        {/* Region Selector Card */}
+        <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 p-6 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-6 w-full md:w-auto">
+            <div className="space-y-1.5 w-full md:w-64">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Select Region</label>
+              <div className="relative">
+                <select 
+                  value={selectedRegion.code}
+                  onChange={(e) => setSelectedRegion(REGIONS.find(r => r.code === e.target.value) || REGIONS[0])}
+                  className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl px-5 pr-10 text-sm font-bold text-slate-900 outline-none appearance-none focus:border-brand transition-all cursor-pointer"
+                >
+                  {REGIONS.map(r => (
+                    <option key={r.code} value={r.code}>{r.flag} {r.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+
+            <div className="hidden lg:flex flex-col gap-1">
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Rates</div>
+              <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                1 USD = {selectedRegion.symbol}{(rates[selectedRegion.rateKey] || 1).toFixed(3)}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 w-full relative">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder={`Search ${selectedRegion.label} Retailers...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-5 text-sm font-bold outline-none focus:border-brand transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Warning Banner */}
+        <div className="mt-6 flex items-center gap-4 bg-red-50 border-2 border-red-100 p-4 rounded-2xl text-red-700">
+          <AlertTriangle className="w-6 h-6 shrink-0" />
+          <p className="font-black tracking-tight text-sm uppercase">{selectedRegion.warning}</p>
+        </div>
+
+        {/* Grid */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Available Retailers</h2>
+              <p className="text-slate-500 font-medium">Verified gift cards for {selectedRegion.label}</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort by</span>
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 outline-none focus:border-brand"
+              >
+                <option value="featured">Newest first</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-80 bg-slate-100 rounded-[2.5rem] animate-pulse" />)}
+            </div>
+          ) : sortedCards.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sortedCards.map((card) => {
+                const theme = getRetailerTheme(card.retailer);
+                return (
+                  <div 
+                    key={card.id} 
+                    className="group relative flex flex-col bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1.5 transition-all cursor-default overflow-hidden"
+                  >
+                    {/* Card Top */}
+                    <div className={`relative h-56 bg-gradient-to-br ${theme.brand} p-8 flex flex-col justify-between text-white overflow-hidden`}>
+                      <div className={`absolute inset-0 ${theme.texture}`} />
+                      <div className="relative flex justify-between items-start">
+                        <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                          {theme.eyebrow}
+                        </div>
+                        <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl uppercase">
+                          {theme.icon}
+                        </div>
+                      </div>
+                      
+                      <div className="relative">
+                        <div className="text-xs font-bold text-white/60 uppercase tracking-widest mb-1">Gift Card Value</div>
+                        <div className="text-4xl font-black tracking-tight">{formatRegionMoney(card.seller_asking_price || card.price, card.currency)}</div>
+                      </div>
+                    </div>
+
+                    {/* Card Bottom */}
+                    <div className="p-8 space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-2xl font-black text-slate-900 tracking-tight">{card.retailer}</h3>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Verified Seller</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">You Pay</div>
+                          <div className="text-xl font-black text-brand">{formatRegionMoney(card.price, card.currency)}</div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Region</div>
+                          <div className="text-sm font-bold text-slate-700">{selectedRegion.flag} {selectedRegion.code}</div>
+                        </div>
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Delivery</div>
+                          <div className="text-sm font-bold text-slate-700">Instant</div>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => openCheckout(card)}
+                        className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
+                      >
+                        Buy with Crypto <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
+              <Tag className="w-16 h-16 text-slate-200 mx-auto mb-6" />
+              <h3 className="text-2xl font-black text-slate-900 mb-2">No cards available</h3>
+              <p className="text-slate-400 font-medium">Try changing the region or search term.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Checkout Modal */}
+      {selectedCard && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setSelectedCard(null)} />
+          <div className="relative w-full max-w-4xl bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <button onClick={() => setSelectedCard(null)} className="absolute right-6 top-6 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white lg:text-slate-900 lg:bg-slate-100 transition-all">
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+              {/* Modal Side */}
+              <div className={`relative p-10 flex flex-col justify-between text-white bg-gradient-to-br ${getRetailerTheme(selectedCard.retailer).brand}`}>
+                <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailer).texture}`} />
+                <div className="relative">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest mb-8">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Checkout
+                  </div>
+                  <h2 className="text-5xl font-black tracking-tight mb-4">{selectedCard.retailer}</h2>
+                  <p className="text-white/60 font-medium leading-relaxed">Verified gift card for {selectedCard.region}. Instant revelation after confirmation.</p>
+                </div>
+
+                <div className="relative space-y-8">
+                  <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">Order Summary</div>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-end">
+                        <span className="text-sm font-bold text-white/60">Gift Card Value</span>
+                        <span className="text-2xl font-black">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price, selectedCard.currency)}</span>
+                      </div>
+                      <div className="flex justify-between items-end border-t border-white/10 pt-4">
+                        <span className="text-sm font-bold text-white/60">You Pay (ETH)</span>
+                        <span className="text-2xl font-black text-emerald-400">≈ {estimateEth(selectedCard.price, selectedCard.currency).toFixed(6)} ETH</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-10">
+                {paymentStep === 'captcha' && (
+                  <div className="h-full flex flex-col justify-center text-center">
+                    <Lock className="w-16 h-16 text-slate-100 mx-auto mb-6" />
+                    <h3 className="text-3xl font-black text-slate-900 mb-2">Bot Protection</h3>
+                    <p className="text-slate-500 font-medium mb-8">Please complete the captcha to proceed with your order.</p>
+                    <RecaptchaField onVerify={handleCaptchaVerify} />
+                  </div>
+                )}
+
+                {paymentStep === 'idle' && (
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-3xl font-black text-slate-900 mb-2">Payment Details</h3>
+                      <p className="text-slate-500 font-medium">Complete payment via MetaMask to reveal code.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white">
+                            <Bitcoin className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <div className="font-black text-slate-900">Ethereum</div>
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sepolia Network</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ETA</div>
+                          <div className="font-bold text-slate-700">~30s</div>
+                        </div>
+                      </div>
+
+                      <div className="bg-[#fcfaf7] border border-slate-200 rounded-[2rem] p-6 space-y-4">
+                        <div className="flex justify-between items-center text-sm font-bold">
+                          <span className="text-slate-400 uppercase tracking-widest">Total ETH</span>
+                          <span className="text-slate-900">{estimateEth(selectedCard.price, selectedCard.currency).toFixed(6)} ETH</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm font-bold">
+                          <span className="text-slate-400 uppercase tracking-widest">Network Fee</span>
+                          <span className="text-emerald-600">Included</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={handlePayment}
+                      className="w-full h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand/20"
+                    >
+                      Pay with MetaMask <Wallet className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+
+                {['connecting', 'paying', 'confirming'].includes(paymentStep) && (
+                  <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+                    <div className="relative">
+                      <div className="w-24 h-24 border-4 border-slate-100 border-t-brand rounded-full animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 text-brand animate-pulse" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-3xl font-black text-slate-900 mb-2">
+                        {paymentStep === 'connecting' && 'Connecting...'}
+                        {paymentStep === 'paying' && 'Confirm Payment'}
+                        {paymentStep === 'confirming' && 'Processing...'}
+                      </h3>
+                      <p className="text-slate-500 font-medium max-w-xs mx-auto">
+                        {paymentStep === 'confirming' ? 'Waiting for blockchain confirmation...' : 'Please follow instructions in MetaMask.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {paymentStep === 'success' && (
+                  <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                      </div>
+                      <h3 className="text-3xl font-black text-slate-900 mb-2">Code Unlocked!</h3>
+                      <p className="text-slate-500 font-medium">Your payment has been verified on the blockchain.</p>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-8 space-y-6">
+                      <div className="space-y-2">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Card Code</div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
+                            {purchasedCard?.card_code || '•••• •••• •••• ••••'}
+                          </div>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(purchasedCard?.card_code || '');
+                              setCodeCopied(true);
+                              setTimeout(() => setCodeCopied(false), 2000);
+                            }}
+                            className="h-14 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                          >
+                            <Copy className={`w-5 h-5 ${codeCopied ? 'text-emerald-500' : 'text-slate-400'}`} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {purchasedCard?.card_pin && (
+                        <div className="space-y-2">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security PIN</div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
+                              {purchasedCard.card_pin}
+                            </div>
+                            <button 
+                              onClick={() => {
+                                navigator.clipboard.writeText(purchasedCard.card_pin || '');
+                                setPinCopied(true);
+                                setTimeout(() => setPinCopied(false), 2000);
+                              }}
+                              className="h-14 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                            >
+                              <Copy className={`w-5 h-5 ${pinCopied ? 'text-emerald-500' : 'text-slate-400'}`} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <button 
+                      onClick={() => setSelectedCard(null)}
+                      className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest transition-all"
+                    >
+                      Close Order
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

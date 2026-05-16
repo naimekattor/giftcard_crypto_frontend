@@ -232,7 +232,7 @@ export default function BuyerDashboardPage() {
             My Purchases
           </div>
           <Link
-            href="/marketplace"
+            href="/buy-gift-cards"
             onClick={() => setSidebarOpen(false)}
             className="text-slate-400 hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 flex items-center gap-3 text-sm transition-all"
           >
@@ -304,7 +304,7 @@ export default function BuyerDashboardPage() {
             <div className="bg-slate-900 rounded-2xl border border-white/5 overflow-hidden">
               <div className="px-4 lg:px-6 py-4 lg:py-5 border-b border-white/5 flex items-center justify-between">
                 <h2 className="text-base lg:text-lg font-bold text-white">Purchase History</h2>
-                <Link href="/marketplace" className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                <Link href="/buy-gift-cards" className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors">
                   + Buy more →
                 </Link>
               </div>
@@ -319,7 +319,7 @@ export default function BuyerDashboardPage() {
                   <div className="text-5xl mb-4">🛒</div>
                   <p className="text-lg font-semibold text-slate-400">No purchases yet</p>
                   <p className="text-sm mt-1 mb-6">Browse the marketplace to find great deals</p>
-                  <Link href="/marketplace">
+                  <Link href="/buy-gift-cards">
                     <button className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-sm transition-all">
                       Browse Marketplace
                     </button>

@@ -35,11 +35,11 @@ export const Footer = () => {
           <div>
             <h3 className="font-bold text-brand uppercase text-[11px] tracking-[0.15em] mb-7">Shop Brands</h3>
             <ul className="space-y-4 text-sm font-bold text-slate-600">
-              <li><Link href="/marketplace?brand=amazon" className="hover:text-brand transition-colors">Amazon Cards</Link></li>
-              <li><Link href="/marketplace?brand=apple" className="hover:text-brand transition-colors">Apple & iTunes</Link></li>
-              <li><Link href="/marketplace?brand=steam" className="hover:text-brand transition-colors">Steam Wallet</Link></li>
-              <li><Link href="/marketplace?brand=razor" className="hover:text-brand transition-colors">Razor Gold</Link></li>
-              <li><Link href="/marketplace?brand=playstation" className="hover:text-brand transition-colors">PlayStation</Link></li>
+              <li><Link href="/buy-gift-cards?brand=amazon" className="hover:text-brand transition-colors">Amazon Cards</Link></li>
+              <li><Link href="/buy-gift-cards?brand=apple" className="hover:text-brand transition-colors">Apple & iTunes</Link></li>
+              <li><Link href="/buy-gift-cards?brand=steam" className="hover:text-brand transition-colors">Steam Wallet</Link></li>
+              <li><Link href="/buy-gift-cards?brand=razor" className="hover:text-brand transition-colors">Razor Gold</Link></li>
+              <li><Link href="/buy-gift-cards?brand=playstation" className="hover:text-brand transition-colors">PlayStation</Link></li>
             </ul>
           </div>
 
@@ -47,7 +47,7 @@ export const Footer = () => {
           <div>
             <h3 className="font-bold text-brand uppercase text-[11px] tracking-[0.15em] mb-7">Platform</h3>
             <ul className="space-y-4 text-sm font-bold">
-              <li><Link href="/marketplace" className="text-slate-600 hover:text-brand transition-colors">Browse All</Link></li>
+              <li><Link href="/buy-gift-cards" className="text-slate-600 hover:text-brand transition-colors">Browse All</Link></li>
               <li><Link href="/wallet" className="text-slate-600 hover:text-brand transition-colors">My Wallet</Link></li>
               <li>
                 {/* CTA Orange used for the Sell action to create urgency */}

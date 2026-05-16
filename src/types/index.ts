@@ -50,6 +50,11 @@ export interface GiftCard {
   description?: string;
   images?: string[];
   file_path?: string;
+  region?: string;
+  currency?: string;
+  retailer?: string;
+  price?: number;
+  seller_asking_price?: number;
   createdAt: string;
   updatedAt: string;
   expiryDate?: string;
