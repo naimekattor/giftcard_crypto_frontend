@@ -1,8 +1,8 @@
-// File: C:\Users\naim dev\Desktop\naim_s_project\gitcard_crypto\frontend\src\app\seller\page.tsx
-import * as entry from '../../../../src/app/seller/page.js'
+// File: C:\Users\naim dev\Desktop\naim_s_project\gitcard_crypto\frontend\src\app\page.tsx
+import * as entry from '../../../src/app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../src/app/seller/page.js')
+type TEntry = typeof import('../../../src/app/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
