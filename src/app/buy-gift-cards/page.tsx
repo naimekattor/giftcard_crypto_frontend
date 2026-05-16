@@ -189,6 +189,8 @@ export default function BuyGiftCardsPage() {
   const [purchasedCard, setPurchasedCard] = useState<CardRecord | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
   const [pinCopied, setPinCopied] = useState(false);
+  const [expiryTime, setExpiryTime] = useState<Date | null>(null);
+  const [timeLeft, setTimeLeft] = useState<string>('');
 
   // ── Region / Currency Switcher ───────────────────────────────────────
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
@@ -298,6 +300,10 @@ export default function BuyGiftCardsPage() {
       setPaymentStep('paying');
       const intent = await buyerApi.buyCard(user.token, Number(selectedCard.id), address);
       
+      if (intent.expires_at) {
+        setExpiryTime(new Date(intent.expires_at));
+      }
+
       const signer = await provider.getSigner();
       const tx = await signer.sendTransaction({
         to: intent.pay_to,
@@ -327,6 +333,7 @@ export default function BuyGiftCardsPage() {
             setPolling(false);
             setPurchasedCard(current.card || null);
             setPaymentStep('success');
+            setExpiryTime(null);
             Swal.fire('Confirmed!', 'Your payment was successful.', 'success');
           }
         } catch (e) {}
@@ -335,26 +342,136 @@ export default function BuyGiftCardsPage() {
     return () => clearInterval(interval);
   }, [polling, user, activePaymentId]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (expiryTime) {
+      interval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = expiryTime.getTime() - now;
+        if (distance < 0) {
+          clearInterval(interval);
+          setTimeLeft('EXPIRED');
+          setPaymentStep('idle');
+          setExpiryTime(null);
+          Swal.fire('Rate Expired', 'The locked exchange rate has expired. Please try again.', 'warning');
+        } else {
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          setTimeLeft(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [expiryTime]);
+
   return (
-    <div className="min-h-screen bg-[#fcfaf7] text-slate-900 pb-20">
+    <div className="min-h-screen bg-[#f5f1e8] text-slate-900 pb-20 font-sans">
       {/* Hero Section */}
-      <div className="bg-slate-950 text-white pt-20 pb-16">
+      <div className="pt-10 pb-6 mb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand/10 border border-brand/20 mb-8">
-              <Sparkles className="w-4 h-4 text-brand animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-brand">Premium Marketplace</span>
+          <div className="bg-[#1a1512] rounded-[3.5rem] p-12 md:p-20 text-white relative overflow-hidden">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-4 py-2.5 pl-3 pr-5 rounded-full bg-[#2a2420] border border-white/10 mb-12">
+  {/* Increased to w-24 for absolute clarity of internal elements */}
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="40 20 320 200" 
+    className="w-24 h-auto shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+  >
+    <defs>
+      {/* High-contrast gloss background for optimal downscaling */}
+      <linearGradient id="signBgPremium" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="100%" stopColor="#f3f4f6" />
+      </linearGradient>
+
+      {/* Deep dark frame border */}
+      <linearGradient id="borderGradPremium" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#374151" />
+        <stop offset="100%" stopColor="#030712" />
+      </linearGradient>
+    </defs>
+
+    {/* Hanging String (Brightened to pop sharply off the dark background badge) */}
+    <g stroke="#d1d5db" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="200" cy="30" r="4" fill="#f9fafb" stroke="none" />
+      <path d="M 200,30 L 105,100 M 200,30 L 295,100" />
+    </g>
+
+    {/* Signboard Matrix (Organic -3 degree tilt) */}
+    <g transform="rotate(-3, 200, 140)">
+      {/* Outer Frame casing */}
+      <rect x="50" y="100" width="300" height="110" rx="10" fill="url(#borderGradPremium)" />
+      
+      {/* Inner Plate display */}
+      <rect x="55" y="105" width="290" height="100" rx="7" fill="url(#signBgPremium)" />
+
+      {/* Mechanical hanging loop holes */}
+      <circle cx="105" cy="100" r="3" fill="#030712" />
+      <circle cx="295" cy="100" r="3" fill="#030712" />
+
+      {/* High-visibility Crypto/Bitcoin Medallion */}
+      <g transform="translate(66, 121)">
+        <circle cx="28" cy="32" r="23" fill="#f2a900" />
+        <circle cx="28" cy="32" r="19" fill="#ffffff" />
+        <path 
+          d="M 32,21 
+             A 11,11 0 1,0 32,43 
+             M 24,15 L 24,20 
+             M 28,15 L 28,20 
+             M 24,44 L 24,49 
+             M 28,44 L 28,49" 
+          fill="none" 
+          stroke="#f2a900" 
+          strokeWidth="4" 
+          strokeLinecap="round" 
+        />
+      </g>
+
+      {/* Internal Typography (Thickened text-weights for micro readability) */}
+      <g font-family="system-ui, -apple-system, sans-serif" font-weight="900">
+        <text x="132" y="152" font-size="33" fill="#030712" letterSpacing="0.5">CRYPTO</text>
+        <text x="134" y="182" font-size="14.5" font-weight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
+      </g>
+    </g>
+  </svg>
+
+  {/* Main Action Text Copy */}
+  <span className="text-[11px] font-bold uppercase tracking-wider text-white/90">
+    Buy gift cards with crypto
+  </span>
+</div>
+
+            {/* Content */}
+            <div className="max-w-4xl">
+              <h1 className="text-2xl md:text-3xl w-1/2 font-semibold font-sans mb-10  leading-[1.05]">
+                Save money on your next shop by purchasing our <span className="text-blue-500">verified gift cards</span>, with fast delivery times.
+              </h1>
+              <p className="text-lg text-white/40 max-w-xl font-medium leading-relaxed mb-16">
+                Browse our store for great discounts on major retailers using cryptocurrency, no questions asked.
+              </p>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">Buy <span className="text-brand">Gift Cards</span> with Crypto</h1>
-            <p className="text-xl text-slate-400 max-w-2xl leading-relaxed">
-              Fast delivery, verified balances, and complete anonymity.
-              Choose from major retailers across the globe.
-            </p>
+
+            {/* Stats Row */}
+            <div className="flex flex-wrap gap-4 mt-auto">
+              <Link href="#listings-grid" className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Live Listings</div>
+                <div className="text-4xl font-black text-white">{cardsData?.total || 0}</div>
+              </Link>
+              
+              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px]">
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4">Crypto Rails</div>
+                <div className="text-lg font-semibold text-white ">Over 50 crypto<br/>currencies accepted</div>
+              </div>
+            </div>
+
+            {/* Decorative element */}
+            <div className="absolute top-1/2 right-0 -translate-y-1/2 w-64 h-64 bg-brand/5 blur-[100px] pointer-events-none" />
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
         {/* Region Selector Card */}
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 p-6 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-6 w-full md:w-auto">
@@ -402,7 +519,7 @@ export default function BuyGiftCardsPage() {
         </div>
 
         {/* Grid */}
-        <div className="mt-12">
+        <div id="listings-grid" className="mt-12">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Available Retailers</h2>
@@ -537,6 +654,16 @@ export default function BuyGiftCardsPage() {
                       </div>
                     </div>
                   </div>
+
+                  {expiryTime && (
+                    <div className="bg-cta/20 border border-cta/30 rounded-3xl p-6 backdrop-blur-md animate-pulse">
+                      <div className="text-[10px] font-black text-cta uppercase tracking-widest mb-1">Rate Locked</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-3xl font-black text-white">{timeLeft}</div>
+                        <div className="text-[10px] font-bold text-white/60 uppercase text-right">Remaining time<br/>to pay</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

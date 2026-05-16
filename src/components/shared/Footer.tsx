@@ -32,7 +32,7 @@ export const Footer = () => {
           </div>
 
           {/* Top Retailers */}
-          <div>
+          {/* <div>
             <h3 className="font-bold text-brand uppercase text-[11px] tracking-[0.15em] mb-7">Shop Brands</h3>
             <ul className="space-y-4 text-sm font-bold text-slate-600">
               <li><Link href="/buy-gift-cards?brand=amazon" className="hover:text-brand transition-colors">Amazon Cards</Link></li>
@@ -41,21 +41,22 @@ export const Footer = () => {
               <li><Link href="/buy-gift-cards?brand=razor" className="hover:text-brand transition-colors">Razor Gold</Link></li>
               <li><Link href="/buy-gift-cards?brand=playstation" className="hover:text-brand transition-colors">PlayStation</Link></li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Platform & Selling */}
           <div>
-            <h3 className="font-bold text-brand uppercase text-[11px] tracking-[0.15em] mb-7">Platform</h3>
+            <h3 className="font-bold text-brand uppercase text-[11px] tracking-[0.15em] mb-7">Quick Links</h3>
             <ul className="space-y-4 text-sm font-bold">
-              <li><Link href="/buy-gift-cards" className="text-slate-600 hover:text-brand transition-colors">Browse All</Link></li>
-              <li><Link href="/wallet" className="text-slate-600 hover:text-brand transition-colors">My Wallet</Link></li>
+              <li><Link href="/seller" className="text-slate-600 hover:text-brand transition-colors">Sell Gift Cards </Link></li>
+              <li><Link href="/buy-gift-cards" className="text-slate-600 hover:text-brand transition-colors">Buy Gift Cards</Link></li>
               <li>
                 {/* CTA Orange used for the Sell action to create urgency */}
-                <Link href="/sell" className="text-cta hover:opacity-80 transition-opacity flex items-center gap-1.5">
-                  Sell Your Cards <span className="text-[10px]">🔥</span>
+                <Link href="/sell" className="text-slate-600 hover:opacity-80 transition-opacity flex items-center gap-1.5">
+                  How It Works
                 </Link>
               </li>
-              <li><Link href="/faq" className="text-slate-600 hover:text-brand transition-colors">Help Center</Link></li>
+              <li><Link href="/contact" className="text-slate-600 hover:text-brand transition-colors">Support </Link></li>
+              <li><Link href="/about" className="text-slate-600 hover:text-brand transition-colors">About Us  </Link></li>
             </ul>
           </div>
 

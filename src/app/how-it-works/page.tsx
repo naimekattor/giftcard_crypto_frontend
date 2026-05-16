@@ -11,6 +11,7 @@ import {
   Shield,
   ArrowRight,
 } from "lucide-react";
+import { useAuth } from '@/features/auth/contexts/AuthContext';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -178,6 +179,8 @@ function StepCard({ step, variant, index }: StepCardProps) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HowItWorksPage() {
+        const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-white">
       {/* ── Hero ── */}
@@ -242,7 +245,7 @@ export default function HowItWorksPage() {
 
           {/* CTA */}
           <div className="mt-10 flex items-center gap-4 flex-wrap">
-            <Link href="/sell-gift-cards">
+            <Link href="/seller">
               <button className="inline-flex items-center gap-2 bg-brand hover:bg-brand/90 text-white font-semibold text-sm px-6 h-11 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand/20">
                 Start selling
                 <ArrowRight className="w-4 h-4" />
@@ -294,7 +297,8 @@ export default function HowItWorksPage() {
       </section>
 
       {/* ── Bottom CTA ── */}
-      <section className="py-16 px-4 bg-slate-900">
+      {!isAuthenticated && (
+        <section className="py-16 px-4 bg-slate-900">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">
             Ready to get started?
@@ -310,6 +314,8 @@ export default function HowItWorksPage() {
           </Link>
         </div>
       </section>
+      )}
+      
     </div>
   );
 }
