@@ -64,6 +64,23 @@ export function SellerCardForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
+
+  useEffect(() => {
+    fetch(`${API_BASE}/exchange-rates`)
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setRates({
+            USD: data.USD ?? 1,
+            GBP: data.GBP ?? 0.79,
+            CAD: data.CAD ?? 1.36,
+            ETH: data.ETH ?? 2650
+          });
+        }
+      })
+      .catch(err => console.error('Error fetching exchange rates for seller form:', err));
+  }, []);
 
   const { register, handleSubmit, formState: { errors }, watch, trigger, setValue } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -142,7 +159,7 @@ export function SellerCardForm() {
       if (!response.ok) throw new Error(json.error || 'Submission failed');
 
       if (json.isValid === false) {
-        throw new Error('This card code appears to be invalid based on our format checks. Please double check the code.');
+        throw new Error('This card code appears to be invalid. Please double check the code.');
       }
 
       setSuccess(true);
@@ -302,22 +319,47 @@ export function SellerCardForm() {
                 <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Payout Wallet</h2>
                 <p className="text-slate-500 font-medium">Where should we send your {regionMeta.currency} earnings?</p>
               </div>
+              {/* Summary */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Listing Summary</p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <span className="text-slate-500">Region</span>
+                  <span className="font-semibold text-slate-800">{regionMeta.flag} {regionMeta.label}</span>
+                  <span className="text-slate-500">Currency</span>
+                  <span className="font-semibold text-slate-800">{regionMeta.currency} ({regionMeta.symbol})</span>
+                  <span className="text-slate-500">Estimated Payout</span>
+                  <span className="font-bold text-brand flex items-center gap-1">
+                    {regionMeta.symbol}{pricing?.sellerReceives.toFixed(2)}
+                    {regionMeta.currency !== 'USD' && (
+                      <span className="text-xs text-slate-500 font-medium normal-case">
+                        (~${(pricing ? pricing.sellerReceives / (rates[regionMeta.currency] || 1) : 0).toFixed(2)} USD)
+                      </span>
+                    )}
+                  </span>
+                </div>
+              </div>
 
-              <div className="bg-slate-950 rounded-[2.5rem] p-10 text-white space-y-8 shadow-2xl">
+              <div className="bg-blue-50 rounded-[2.5rem] p-10 text-white space-y-8 ">
                 <div className="flex items-center gap-5">
                   <div className="w-14 h-14 bg-brand rounded-2xl flex items-center justify-center shadow-lg shadow-brand/40">
                     <Wallet className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black tracking-tight">ERC-20 Wallet</h3>
-                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest">ETH or USDC Address</p>
+                    <h3 className="text-xl font-semibold text-black tracking-wide">ERC-20 Wallet</h3>
+                    <p className="text-xs font-semibold text-black/80 uppercase tracking-widest">ETH or USDC Address</p>
                   </div>
                 </div>
                 
                 <div className="space-y-3">
-                  <input type="text" placeholder="0x..." {...register('sellerWallet')} className="w-full h-16 rounded-2xl bg-white/5 border-2 border-white/5 px-6 text-sm font-mono font-bold text-white outline-none focus:border-brand transition-all" />
-                  <p className="text-[10px] font-bold text-white uppercase tracking-widest px-1">Ensure this is a personal wallet, not an exchange deposit.</p>
+                  <input type="text" placeholder="0x..." {...register('sellerWallet')} className="w-full h-16 rounded-2xl bg-white border-2 border-white px-6 text-sm font-mono font-bold text-black outline-none focus:border-brand transition-all" />
+                  <p className="text-[10px] font-bold text-black uppercase tracking-widest px-1">Ensure this is a personal wallet, not an exchange deposit.</p>
                 </div>
+              </div>
+              <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700 leading-relaxed font-medium">
+                  Funds are held in an escrow for up to 24 hours, buyers have to confirm the purchase within 24 hours, otherwise the funds are released to the seller. If any issues arise, an investigation will be conducted.
+                </p>
               </div>
 
               <div className="space-y-6">

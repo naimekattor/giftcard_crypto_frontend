@@ -35,7 +35,7 @@ const sellingSteps = [
     icon: Bitcoin,
     title: "Receive Crypto Payment",
     description:
-      "Receive payment in as little as 30 minutes after your listing has successfully sold. Fast, secure, and straight to your wallet.",
+      "Receive payment in as little as 30 minutes after your listing has successfully sold.",
     highlight: true,
   },
 ];
@@ -46,21 +46,21 @@ const buyingSteps = [
     icon: Search,
     title: "Search Gift Cards",
     description:
-      "Buy gift cards through our online marketplace and save money on your next purchase. Browse hundreds of brands across various regions.",
+      "Buy gift cards through our online marketplace and save money on your next purchase. ",
   },
   {
     number: "02",
     icon: ShoppingCart,
     title: "Secure Purchase",
     description:
-      "Add the gift cards of your choice to your basket, select which cryptocurrency you wish to pay with, and complete your purchase.",
+      "Input the gift card/s of your choice into your basket, select which crypto currency you wish to make purchase from and make payment.",
   },
   {
     number: "03",
     icon: Zap,
     title: "Fast Delivery",
     description:
-      "Our automated system will deliver your gift card on the same day — generally within an hour of your purchase being confirmed.",
+      "Our automated system will deliver your gift card on the same day, generally within an hour. ",
     highlight: true,
   },
   {
@@ -68,7 +68,7 @@ const buyingSteps = [
     icon: Shield,
     title: "Escrow Protection",
     description:
-      "We use a sophisticated anti-abuse system to stop sellers from redeeming gift cards once listed. Our log-based system plus randomised delivery timing means sellers never know in real time when their card is sold — giving buyers complete peace of mind.",
+      "We want buyers to have peace of mind when buying gift cards, this is done through our escrow system, We use a sophisticated anti-abuse system to stop sellers from redeeming gift cards once listed on our site. We have a log based system, as well as randomised delivery timing for the buyer, so the seller will never know live in time when his gift card is sold.  ",
   },
 ];
 
@@ -246,7 +246,7 @@ export default function HowItWorksPage() {
           {/* CTA */}
           <div className="mt-10 flex items-center gap-4 flex-wrap">
             <Link href="/seller">
-              <button className="inline-flex items-center gap-2 bg-brand hover:bg-brand/90 text-white font-semibold text-sm px-6 h-11 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand/20">
+              <button className="cursor-pointer inline-flex items-center gap-2 bg-brand hover:bg-brand/90 text-white font-semibold text-sm px-6 h-11 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand/20">
                 Start selling
                 <ArrowRight className="w-4 h-4" />
               </button>

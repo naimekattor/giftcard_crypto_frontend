@@ -196,6 +196,7 @@ export default function BuyGiftCardsPage() {
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
   const [ratesLoading, setRatesLoading] = useState(true);
+  const [totalListings, setTotalListings] = useState<number>(0);
 
   const fetchRates = useCallback(async () => {
     setRatesLoading(true);
@@ -215,7 +216,22 @@ export default function BuyGiftCardsPage() {
     } finally { setRatesLoading(false); }
   }, []);
 
-  useEffect(() => { fetchRates(); }, [fetchRates]);
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/stats`);
+      if (res.ok) {
+        const data = await res.json();
+        setTotalListings(data.totalListings || 0);
+      }
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  }, []);
+
+  useEffect(() => { 
+    fetchRates(); 
+    fetchStats();
+  }, [fetchRates, fetchStats]);
 
   const formatRegionMoney = (fiatPrice: number, currency: string) => {
     const symbol = REGIONS.find(r => r.currency === currency)?.symbol || '$';
@@ -455,8 +471,8 @@ export default function BuyGiftCardsPage() {
             {/* Stats Row */}
             <div className="flex flex-wrap gap-4 mt-auto">
               <Link href="#listings-grid" className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
-                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Live Listings</div>
-                <div className="text-4xl font-black text-white">{cardsData?.total || 0}</div>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Listings</div>
+                <div className="text-4xl font-black text-white">{totalListings > 0 ? totalListings : (cardsData?.total || 0)}</div>
               </Link>
               
               <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px]">
