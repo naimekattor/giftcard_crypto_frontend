@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/(auth)/login/page": "/login",
+  "/(auth)/forgot-password/page": "/forgot-password",
+  "/(auth)/reset-password/page": "/reset-password",
+  "/(auth)/signup/page": "/signup",
+  "/(auth)/verify-email/page": "/verify-email",
+  "/buy-gift-cards/page": "/buy-gift-cards",
+  "/dashboard/buyer/page": "/dashboard/buyer",
+  "/how-it-works/page": "/how-it-works",
+  "/dashboard/seller/page": "/dashboard/seller",
+  "/page": "/",
+  "/seller/page": "/seller",
+  "/(dashboard)/buyer/page": "/buyer",
+  "/(dashboard)/admin/page": "/admin"
+}

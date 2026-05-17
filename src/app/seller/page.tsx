@@ -43,8 +43,8 @@ export default function SellerPage() {
                     <Zap className="w-6 h-6 text-cta" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900">Instant Listing</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">Your card goes live immediately after submission.</p>
+                    <h3 className="font-bold text-slate-900">Fast listing times</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">Your gift card listing goes live quickly after submission, once validated </p>
                   </div>
                 </div>
 
@@ -53,8 +53,8 @@ export default function SellerPage() {
                     <ShieldCheck className="w-6 h-6" style={{ color: '#01aa88' }} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900">Secure Payouts</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">Automatic crypto transfers to your wallet after sale.</p>
+                    <h3 className="font-bold text-slate-900">Lightning fast payoutss</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">Crypto is transferred into your wallet within as little as 30 minutes. </p>
                   </div>
                 </div>
               </div>

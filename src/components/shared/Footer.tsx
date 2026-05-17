@@ -15,8 +15,7 @@ export const Footer = () => {
               <Image src="/logo.png" alt="GiftCard Market" width={150} height={40} />
             </Link>
             <p className="text-slate-500 text-sm leading-relaxed max-w-sm mb-8 font-medium">
-              The world's most secure, anonymous peer-to-peer gift card marketplace. 
-              Buy at a discount, or sell for instant crypto payouts.
+              The world's most secure, anonymous peer-to-peer gift card marketplace. Buy at a great discount, or sell for fast crypto payouts straight to your wallet.
             </p>
             <div className="flex gap-4">
               <Link href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-brand hover:bg-brand/5 transition-all">
@@ -78,7 +77,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-            © 2026 GiftCard Market. Decentralized Peer-to-Peer Trading.
+            © 2026 GiftCard Market. Decentralised Peer-to-Peer Trading.
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase">

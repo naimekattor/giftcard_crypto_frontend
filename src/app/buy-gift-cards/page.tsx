@@ -237,8 +237,8 @@ export default function BuyGiftCardsPage() {
       
       const searchValue = searchQuery.trim().toLowerCase();
       const matchesSearch = !searchValue || 
-        card.retailer.toLowerCase().includes(searchValue) ||
-        card.name.toLowerCase().includes(searchValue);
+        (card.retailer?.toLowerCase().includes(searchValue)) ||
+        (card.retailerName?.toLowerCase().includes(searchValue));
 
       return matchesRegion && matchesSearch;
     });
@@ -246,8 +246,8 @@ export default function BuyGiftCardsPage() {
 
   const sortedCards = useMemo(() => {
     return [...filteredCards].sort((a, b) => {
-      if (sortBy === 'price-low') return a.price - b.price;
-      if (sortBy === 'price-high') return b.price - a.price;
+      if (sortBy === 'price-low') return (a.price ?? 0) - (b.price ?? 0);
+      if (sortBy === 'price-high') return (b.price ?? 0) - (a.price ?? 0);
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [filteredCards, sortBy]);
@@ -444,10 +444,10 @@ export default function BuyGiftCardsPage() {
 
             {/* Content */}
             <div className="max-w-4xl">
-              <h1 className="text-2xl md:text-3xl w-1/2 font-semibold font-sans mb-10  leading-[1.05]">
+              <h1 className="font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl">
                 Save money on your next shop by purchasing our <span className="text-blue-500">verified gift cards</span>, with fast delivery times.
               </h1>
-              <p className="text-lg text-white/40 max-w-xl font-medium leading-relaxed mb-16">
+              <p className="text-lg text-white/60 max-w-xl font-medium leading-relaxed mb-16">
                 Browse our store for great discounts on major retailers using cryptocurrency, no questions asked.
               </p>
             </div>
@@ -547,7 +547,7 @@ export default function BuyGiftCardsPage() {
           ) : sortedCards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {sortedCards.map((card) => {
-                const theme = getRetailerTheme(card.retailer);
+                const theme = getRetailerTheme(card.retailer || '');
                 return (
                   <div 
                     key={card.id} 
@@ -567,7 +567,7 @@ export default function BuyGiftCardsPage() {
                       
                       <div className="relative">
                         <div className="text-xs font-bold text-white/60 uppercase tracking-widest mb-1">Gift Card Value</div>
-                        <div className="text-4xl font-black tracking-tight">{formatRegionMoney(card.seller_asking_price || card.price, card.currency)}</div>
+                        <div className="text-4xl font-black tracking-tight">{formatRegionMoney(card.seller_asking_price || card.price || 0, card.currency || 'USD')}</div>
                       </div>
                     </div>
 
@@ -583,7 +583,7 @@ export default function BuyGiftCardsPage() {
                         </div>
                         <div className="text-right">
                           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">You Pay</div>
-                          <div className="text-xl font-black text-brand">{formatRegionMoney(card.price, card.currency)}</div>
+                          <div className="text-xl font-black text-brand">{formatRegionMoney(card.price || 0, card.currency || 'USD')}</div>
                         </div>
                       </div>
 
@@ -600,7 +600,7 @@ export default function BuyGiftCardsPage() {
 
                       <button 
                         onClick={() => openCheckout(card)}
-                        className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
+                        className="w-full cursor-pointer h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
                       >
                         Buy with Crypto <ArrowRight className="w-4 h-4" />
                       </button>
@@ -630,8 +630,8 @@ export default function BuyGiftCardsPage() {
 
             <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
               {/* Modal Side */}
-              <div className={`relative p-10 flex flex-col justify-between text-white bg-gradient-to-br ${getRetailerTheme(selectedCard.retailer).brand}`}>
-                <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailer).texture}`} />
+              <div className={`relative p-10 flex flex-col justify-between text-white bg-gradient-to-br ${getRetailerTheme(selectedCard.retailer || '').brand}`}>
+                <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailer || '').texture}`} />
                 <div className="relative">
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest mb-8">
                     <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Checkout
@@ -646,11 +646,11 @@ export default function BuyGiftCardsPage() {
                     <div className="space-y-4">
                       <div className="flex justify-between items-end">
                         <span className="text-sm font-bold text-white/60">Gift Card Value</span>
-                        <span className="text-2xl font-black">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price, selectedCard.currency)}</span>
+                        <span className="text-2xl font-black">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price || 0, selectedCard.currency || 'USD')}</span>
                       </div>
                       <div className="flex justify-between items-end border-t border-white/10 pt-4">
                         <span className="text-sm font-bold text-white/60">You Pay (ETH)</span>
-                        <span className="text-2xl font-black text-emerald-400">≈ {estimateEth(selectedCard.price, selectedCard.currency).toFixed(6)} ETH</span>
+                        <span className="text-2xl font-black text-emerald-400">≈ {estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
                       </div>
                     </div>
                   </div>
@@ -705,7 +705,7 @@ export default function BuyGiftCardsPage() {
                       <div className="bg-[#fcfaf7] border border-slate-200 rounded-[2rem] p-6 space-y-4">
                         <div className="flex justify-between items-center text-sm font-bold">
                           <span className="text-slate-400 uppercase tracking-widest">Total ETH</span>
-                          <span className="text-slate-900">{estimateEth(selectedCard.price, selectedCard.currency).toFixed(6)} ETH</span>
+                          <span className="text-slate-900">{estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
                         </div>
                         <div className="flex justify-between items-center text-sm font-bold">
                           <span className="text-slate-400 uppercase tracking-widest">Network Fee</span>
@@ -809,6 +809,28 @@ export default function BuyGiftCardsPage() {
           </div>
         </div>
       )}
+
+
+      <section className="max-w-7xl mx-auto mt-10 rounded-[28px] bg-[#f59f0b] px-6 py-6 text-slate-950 shadow-[0_18px_40px_rgba(245,159,11,0.25)] sm:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="rounded-2xl bg-white/60 p-3">
+                <Tag className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">Sell your gift cards for crypto</h3>
+                <p className="mt-1 max-w-2xl text-sm text-slate-800">
+                  Ready to cash out? List your cards and receive crypto payments directly to your wallet.
+                </p>
+              </div>
+            </div>
+            <Link href={"/seller"}>
+            <button className="cursor-pointer inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800">
+              List a card
+            </button>
+            </Link>
+          </div>
+        </section>
     </div>
   );
 }

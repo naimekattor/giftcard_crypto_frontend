@@ -1,7 +1,16 @@
 {
-  "/page": "app/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(auth)/forgot-password/page": "app/(auth)/forgot-password/page.js",
+  "/(auth)/reset-password/page": "app/(auth)/reset-password/page.js",
+  "/(auth)/signup/page": "app/(auth)/signup/page.js",
+  "/(auth)/verify-email/page": "app/(auth)/verify-email/page.js",
+  "/buy-gift-cards/page": "app/buy-gift-cards/page.js",
   "/dashboard/buyer/page": "app/dashboard/buyer/page.js",
   "/how-it-works/page": "app/how-it-works/page.js",
+  "/dashboard/seller/page": "app/dashboard/seller/page.js",
+  "/page": "app/page.js",
   "/seller/page": "app/seller/page.js",
-  "/buy-gift-cards/page": "app/buy-gift-cards/page.js"
+  "/(dashboard)/buyer/page": "app/(dashboard)/buyer/page.js",
+  "/(dashboard)/admin/page": "app/(dashboard)/admin/page.js"
 }

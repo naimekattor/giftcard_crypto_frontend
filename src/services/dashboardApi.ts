@@ -80,6 +80,7 @@ export const buyerApi = {
       eth_amount?: number;
       pay_to: string; 
       asset: string;
+      expires_at?: string;
     }>(
       '/buyer/buy',
       token,
