@@ -50,7 +50,7 @@ export const Footer = () => {
               <li><Link href="/buy-gift-cards" className="text-slate-600 hover:text-brand transition-colors">Buy Gift Cards</Link></li>
               <li>
                 {/* CTA Orange used for the Sell action to create urgency */}
-                <Link href="/sell" className="text-slate-600 hover:opacity-80 transition-opacity flex items-center gap-1.5">
+                <Link href="/how-it-works" className="text-slate-600 hover:opacity-80 transition-opacity flex items-center gap-1.5">
                   How It Works
                 </Link>
               </li>
