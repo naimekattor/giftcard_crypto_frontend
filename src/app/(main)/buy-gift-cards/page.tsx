@@ -32,9 +32,9 @@ import { buyerApi, type CardRecord } from '@/services/dashboardApi';
 import { RecaptchaField } from '@/components/shared/RecaptchaField';
 
 const REGIONS = [
-  { code: 'USA', flag: '🇺🇸', label: 'United States', currency: 'USD', rateKey: 'USD', symbol: '$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE USA' },
-  { code: 'UK',  flag: '🇬🇧', label: 'United Kingdom', currency: 'GBP', rateKey: 'GBP', symbol: '£', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE UK' },
-  { code: 'Canada',  flag: '🇨🇦', label: 'Canada', currency: 'CAD', rateKey: 'CAD', symbol: 'CA$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN CANADA' },
+  { code: 'USA', flag: '🇺🇸', flagUrl: 'https://flagcdn.com/us.svg', label: 'United States', currency: 'USD', rateKey: 'USD', symbol: '$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE USA' },
+  { code: 'UK',  flag: '🇬🇧', flagUrl: 'https://flagcdn.com/gb.svg', label: 'United Kingdom', currency: 'GBP', rateKey: 'GBP', symbol: '£', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE UK' },
+  { code: 'Canada',  flag: '🇨🇦', flagUrl: 'https://flagcdn.com/ca.svg', label: 'Canada', currency: 'CAD', rateKey: 'CAD', symbol: 'CA$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN CANADA' },
 ];
 
 const RETAILERS_BY_REGION: Record<string, string[]> = {
@@ -194,6 +194,7 @@ export default function BuyGiftCardsPage() {
 
   // ── Region / Currency Switcher ───────────────────────────────────────
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
+  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
   const [ratesLoading, setRatesLoading] = useState(true);
   const [totalActive, setTotalActive] = useState<number>(0);
@@ -497,19 +498,57 @@ export default function BuyGiftCardsPage() {
         {/* Region Selector Card */}
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 p-6 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-6 w-full md:w-auto">
-            <div className="space-y-1.5 w-full md:w-64">
+            <div className="space-y-1.5 w-full md:w-64 relative z-50">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Select Region</label>
               <div className="relative">
-                <select 
-                  value={selectedRegion.code}
-                  onChange={(e) => setSelectedRegion(REGIONS.find(r => r.code === e.target.value) || REGIONS[0])}
-                  className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl px-5 pr-10 text-sm font-bold text-slate-900 outline-none appearance-none focus:border-brand transition-all cursor-pointer"
+                <button 
+                  type="button"
+                  onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
+                  className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl px-5 pr-10 text-sm font-bold text-slate-900 outline-none flex items-center justify-between transition-all cursor-pointer hover:bg-slate-100/50 focus:border-brand"
                 >
-                  {REGIONS.map(r => (
-                    <option key={r.code} value={r.code}>{r.flag} {r.label}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={selectedRegion.flagUrl} 
+                      alt="" 
+                      className="w-6 h-4 object-cover rounded-sm shadow-sm animate-fade-in"
+                    />
+                    <span>{selectedRegion.label}</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isRegionDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsRegionDropdownOpen(false)}
+                    />
+                    <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl shadow-slate-200/50 py-2 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      {REGIONS.map(r => (
+                        <button
+                          key={r.code}
+                          type="button"
+                          onClick={() => {
+                            setSelectedRegion(r);
+                            setIsRegionDropdownOpen(false);
+                          }}
+                          className={`w-full px-5 py-3 text-left text-sm font-bold flex items-center gap-3 transition-colors ${
+                            selectedRegion.code === r.code 
+                              ? 'bg-slate-50 text-brand' 
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <img 
+                            src={r.flagUrl} 
+                            alt="" 
+                            className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                          />
+                          <span>{r.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -612,7 +651,14 @@ export default function BuyGiftCardsPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Region</div>
-                          <div className="text-sm font-bold text-slate-700">{selectedRegion.flag} {selectedRegion.code}</div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <img 
+                              src={selectedRegion.flagUrl} 
+                              alt="" 
+                              className="w-5 h-3.5 object-cover rounded-sm shadow-sm"
+                            />
+                            <span className="text-sm font-bold text-slate-700">{selectedRegion.code}</span>
+                          </div>
                         </div>
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Delivery</div>
