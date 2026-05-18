@@ -43,6 +43,35 @@ const RETAILER_RATES: Record<string, { sellerRate: number; buyerRate: number }> 
   "ASDA": { sellerRate: 0.72, buyerRate: 0.81 },
 };
 
+const RETAILER_VALIDATIONS: Record<string, { digits: number | number[]; startsWith: string[]; pinRequired: boolean; strictPrefix?: boolean }> = {
+  // USA RETAILERS
+  "Amazon": { digits: [14, 15, 16], startsWith: ["AQ"], pinRequired: true, strictPrefix: false },
+  "Nike": { digits: [19], startsWith: ["6060"], pinRequired: true, strictPrefix: false },
+  "Uber": { digits: [16], startsWith: ["6110"], pinRequired: false, strictPrefix: false },
+  "DICK’S SPORTING GOODS": { digits: [19], startsWith: ["6006"], pinRequired: true, strictPrefix: false },
+  "Steam": { digits: [15], startsWith: ["A", "B"], pinRequired: false, strictPrefix: false },
+  "Door Dash": { digits: [16], startsWith: ["6109"], pinRequired: true, strictPrefix: false },
+  "AMC": { digits: [19], startsWith: ["6036", "6366"], pinRequired: true, strictPrefix: false },
+  "Best Buy": { digits: [15, 16], startsWith: ["6006", "6102"], pinRequired: true, strictPrefix: false },
+  "PlayStation": { digits: [12], startsWith: [], pinRequired: false, strictPrefix: false },
+  "Xbox": { digits: [25], startsWith: [], pinRequired: false, strictPrefix: false },
+  "Costco": { digits: [16], startsWith: ["61"], pinRequired: true, strictPrefix: false },
+
+  // UK RETAILERS
+  "Uber_UK": { digits: 16, startsWith: ["NAAA"], pinRequired: false },
+  "Currys": { digits: 19, startsWith: ["5045075659"], pinRequired: true },
+  "John Lewis": { digits: 19, startsWith: ["63719600"], pinRequired: true },
+  "Apple": { digits: 16, startsWith: ["X"], pinRequired: false },
+  "Deliveroo": { digits: 16, startsWith: ["NAAQ"], pinRequired: false },
+  "Just Eat": { digits: 12, startsWith: ["C"], pinRequired: false },
+  "Halfords": { digits: 19, startsWith: ["50450758"], pinRequired: true },
+  "ASDA": { digits: 16, startsWith: ["63"], pinRequired: true },
+  "PlayStation_UK": { digits: 12, startsWith: [], pinRequired: false },
+
+  // CANADA RETAILERS
+  "Amazon_CA": { digits: 15, startsWith: [], pinRequired: true }
+};
+
 const formSchema = z.object({
   retailer: z.string().min(1, 'Please select a retailer'),
   region: z.string().min(1, 'Please select a region'),
@@ -65,6 +94,7 @@ export function SellerCardForm() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
+  const [codeWarning, setCodeWarning] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${API_BASE}/exchange-rates`)
@@ -82,10 +112,15 @@ export function SellerCardForm() {
       .catch(err => console.error('Error fetching exchange rates for seller form:', err));
   }, []);
 
-  const { register, handleSubmit, formState: { errors }, watch, trigger, setValue } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, watch, trigger, setValue, setError, clearErrors } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: { region: 'USA', retailer: '' },
   });
+
+  const watchedCardCode = watch('cardCode');
+  useEffect(() => {
+    setCodeWarning(null);
+  }, [watchedCardCode]);
 
   const selectedRegion = watch('region');
   const selectedRetailer = watch('retailer');
@@ -118,9 +153,85 @@ export function SellerCardForm() {
     };
   }, [cardValueStr, selectedRetailer]);
 
+  const validateStep1 = (data: { retailer: string; region: string; cardCode: string; pin?: string }) => {
+    const { retailer, region, cardCode, pin } = data;
+    const code = (cardCode || '').trim();
+    const pinVal = (pin || '').trim();
+
+    if (!retailer) return { error: { field: 'retailer' as const, message: 'Please select a retailer' } };
+    if (!region) return { error: { field: 'region' as const, message: 'Please select a region' } };
+    if (!code) return { error: { field: 'cardCode' as const, message: 'Gift card code is required' } };
+
+    const configKey = region === "UK" 
+      ? (retailer === "Uber" ? "Uber_UK" : (retailer === "PlayStation" ? "PlayStation_UK" : retailer)) 
+      : (region === "Canada" && retailer === "Amazon" ? "Amazon_CA" : retailer);
+
+    const config = RETAILER_VALIDATIONS[configKey];
+
+    if (config) {
+      // Validate digits (supporting single value or array of values)
+      const digitsArray = Array.isArray(config.digits) ? config.digits : [config.digits];
+      if (!digitsArray.includes(code.length)) {
+        return { error: { field: 'cardCode' as const, message: `Invalid card code. Must be exactly ${digitsArray.join(' or ')} characters for ${retailer} (${region}).` } };
+      }
+
+      // Validate prefix (case-insensitive)
+      let hasWarning = false;
+      if (config.startsWith.length > 0) {
+        const upperCode = code.toUpperCase();
+        const matchesPrefix = config.startsWith.some(prefix => upperCode.startsWith(prefix.toUpperCase()));
+        if (!matchesPrefix) {
+          const isStrict = config.strictPrefix !== false;
+          if (isStrict) {
+            return { error: { field: 'cardCode' as const, message: `Invalid card code. For ${retailer} in ${region}, it must start with: ${config.startsWith.join(', ')}` } };
+          } else {
+            hasWarning = true;
+          }
+        }
+      }
+
+      // Validate PIN
+      if (config.pinRequired && !pinVal) {
+        return { error: { field: 'pin' as const, message: `Security PIN is required for ${retailer} (${region}).` } };
+      }
+
+      if (hasWarning) {
+        return { warning: "This gift card format appears unusual. Please double-check your details." };
+      }
+    }
+
+    return null;
+  };
+
   const nextStep = async () => {
+    clearErrors(['retailer', 'region', 'price', 'cardCode', 'pin']);
+    setCodeWarning(null);
     const isValid = await trigger(['retailer', 'region', 'price', 'cardCode']);
-    if (isValid) setStep(2);
+    if (!isValid) return;
+
+    const retailer = watch('retailer');
+    const region = watch('region');
+    const cardCode = watch('cardCode');
+    const pin = watch('pin');
+
+    const result = validateStep1({ retailer, region, cardCode, pin });
+    if (result) {
+      if (result.error) {
+        setError(result.error.field, { type: 'manual', message: result.error.message });
+        return;
+      }
+      if (result.warning) {
+        setCodeWarning(result.warning);
+      }
+    }
+
+    if (!selectedFile) {
+      setApiError('Please upload a screenshot of your gift card before continuing.');
+      return;
+    }
+
+    setApiError(null);
+    setStep(2);
   };
   const prevStep = () => setStep(1);
 
@@ -270,10 +381,10 @@ export function SellerCardForm() {
                       <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">You will receive</div>
                       <div className="text-4xl font-black text-brand tracking-tight">{regionMeta.symbol}{pricing.sellerReceives.toFixed(2)}</div>
                     </div>
-                    <div className="text-right">
+                    {/* <div className="text-right">
                       <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Platform Charge</div>
                       <div className="text-sm font-bold text-white/80">{regionMeta.symbol}{pricing.charge.toFixed(2)} ({pricing.rateLabel})</div>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
                     <Info className="w-4 h-4 text-brand" />
@@ -289,11 +400,75 @@ export function SellerCardForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">04. Gift Card Code</label>
-                    <input type="text" placeholder="XXXX-XXXX-XXXX" {...register('cardCode')} className="w-full h-16 rounded-2xl border-2 border-slate-50 bg-slate-50 px-5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-brand transition-all" />
+                    <input
+                      type="text"
+                      placeholder="XXXX-XXXX-XXXX"
+                      {...register('cardCode')}
+                      className={`w-full h-16 rounded-2xl border-2 px-5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-brand transition-all ${
+                        errors.cardCode ? 'border-red-500 bg-red-50/50 focus:border-red-500' :
+                        codeWarning ? 'border-amber-500 bg-amber-50/50 focus:border-amber-500' :
+                        'border-slate-50 bg-slate-50 focus:bg-white'
+                      }`}
+                    />
+                    {errors.cardCode ? (
+                      <p className="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {errors.cardCode.message}
+                      </p>
+                    ) : codeWarning ? (
+                      <p className="text-xs text-amber-600 font-bold mt-1.5 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" />
+                        {codeWarning}
+                      </p>
+                    ) : (
+                      (() => {
+                        const configKey = selectedRegion === "UK" 
+                          ? (selectedRetailer === "Uber" ? "Uber_UK" : (selectedRetailer === "PlayStation" ? "PlayStation_UK" : selectedRetailer)) 
+                          : (selectedRegion === "Canada" && selectedRetailer === "Amazon" ? "Amazon_CA" : selectedRetailer);
+                        const config = RETAILER_VALIDATIONS[configKey];
+                        if (config) {
+                          const digitsArray = Array.isArray(config.digits) ? config.digits : [config.digits];
+                          return (
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 block">
+                              Expected: {digitsArray.join(' or ')} characters{config.startsWith.length > 0 ? ` (must start with: ${config.startsWith.join(', ')})` : ''}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()
+                    )}
                   </div>
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">05. Security PIN (If any)</label>
-                    <input type="text" placeholder="1234" {...register('pin')} className="w-full h-16 rounded-2xl border-2 border-slate-50 bg-slate-50 px-5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-brand transition-all" />
+                    <input
+                      type="text"
+                      placeholder="1234"
+                      {...register('pin')}
+                      className={`w-full h-16 rounded-2xl border-2 px-5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-brand transition-all ${
+                        errors.pin ? 'border-red-500 bg-red-50/50 focus:border-red-500' : 'border-slate-50 bg-slate-50 focus:bg-white'
+                      }`}
+                    />
+                    {errors.pin ? (
+                      <p className="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {errors.pin.message}
+                      </p>
+                    ) : (
+                      (() => {
+                        const configKey = selectedRegion === "UK" 
+                          ? (selectedRetailer === "Uber" ? "Uber_UK" : (selectedRetailer === "PlayStation" ? "PlayStation_UK" : selectedRetailer)) 
+                          : (selectedRegion === "Canada" && selectedRetailer === "Amazon" ? "Amazon_CA" : selectedRetailer);
+                        const config = RETAILER_VALIDATIONS[configKey];
+                        if (config) {
+                          return (
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 block">
+                              {config.pinRequired ? '⚠ Security PIN is required' : 'Optional'}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()
+                    )}
                   </div>
                 </div>
 

@@ -4,6 +4,7 @@ import React from 'react';
 import { SellerCardForm } from '@/features/giftcards/components/SellerCardForm';
 import { Footer } from '@/components/shared/Footer';
 import { ShieldCheck, Zap, Lock } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SellerPage() {
   return (
@@ -62,9 +63,11 @@ export default function SellerPage() {
               <div className="p-8 bg-slate-900 rounded-[2rem] text-white">
                 <h4 className="font-black mb-2 tracking-tight">NEED HELP?</h4>
                 <p className="text-sm text-slate-400 font-medium mb-6">Our support team is available 24/7 via Telegram.</p>
-                <button className="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-xl transition-colors text-sm">
+                <Link href={"/contact"}>
+                <button className=" cursor-pointer w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-xl transition-colors text-sm">
                   Contact Support
                 </button>
+                </Link>
               </div>
             </div>
 

@@ -42,6 +42,7 @@ export const Navigation: React.FC = () => {
             <Link href="/" className={linkClass('/')}>Home</Link>
             <Link href="/buy-gift-cards" className={linkClass('/buy-gift-cards')}>Buy Cards</Link>
             <Link href="/seller" className={linkClass('/seller')}>Sell Cards</Link>
+            <Link href="/how-it-works" className={linkClass('/seller')}>How It Works</Link>
 
             {isAuthenticated ? (
               <>
@@ -78,7 +79,7 @@ export const Navigation: React.FC = () => {
         {/* Mobile menu */}
         {isOpen && (
           <div className="md:hidden pb-5 space-y-1 border-t border-slate-100 pt-4">
-            {[['/', 'Home'], ['/buy-gift-cards', 'Buy Cards'], ['/seller', 'Sell Cards']].map(([href, label]) => (
+            {[['/', 'Home'], ['/buy-gift-cards', 'Buy Cards'], ['/seller', 'Sell Cards'],['/how-it-works', 'How it works']].map(([href, label]) => (
               <Link key={href} href={href} onClick={() => setIsOpen(false)}
                 className="block px-3 py-3 text-sm font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
                 {label}

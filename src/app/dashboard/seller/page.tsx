@@ -12,14 +12,37 @@ import { sellerApi, type CardRecord } from '@/services/dashboardApi';
 const statusStyles: Record<string, string> = {
   active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   sold: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  in_verification: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  reserved: 'bg-slate-500/10 text-slate-300 border-slate-500/20',
   cancelled: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
 };
 
 const statusIcons: Record<string, string> = {
   active: '🟢',
   sold: '🔵',
+  in_verification: '🟡',
+  reserved: '🔒',
   cancelled: '⚫',
 };
+
+const statusLabels: Record<string, string> = {
+  active: 'Active',
+  sold: 'Sold',
+  in_verification: 'In Verification',
+  reserved: 'Reserved',
+  cancelled: 'Cancelled',
+};
+
+// Returns a display status that hides real-time sale timing from sellers
+function getDisplayStatus(card: CardRecord): string {
+  if (card.status === 'sold') {
+    // Only show 'Sold' once escrow is fully completed
+    if (card.payment?.status === 'completed') return 'sold';
+    // During escrow holding period, show a neutral intermediate status
+    return 'in_verification';
+  }
+  return card.status;
+}
 
 const currencySymbols: Record<string, string> = {
   GBP: '£',
@@ -120,7 +143,7 @@ export default function SellerDashboardPage() {
   const stats = {
     total: cards.length,
     active: cards.filter((c) => c.status === 'active').length,
-    sold: cards.filter((c) => c.status === 'sold').length,
+    sold: cards.filter((c) => ['sold', 'in_verification'].includes(getDisplayStatus(c))).length,
     cancelled: cards.filter((c) => c.status === 'cancelled').length,
     totalEarnings: cards.filter((c) => c.status === 'sold').reduce((s, c) => s + (c.payment?.seller_payout_amount || 0), 0),
   };
@@ -351,13 +374,18 @@ export default function SellerDashboardPage() {
                           </td>
 
                           <td className="px-4 lg:px-6 py-4">
-                            <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border whitespace-nowrap ${
-                                statusStyles[card.status] || statusStyles.cancelled
-                              }`}
-                            >
-                              {statusIcons[card.status]} {card.status}
-                            </span>
+                            {(() => {
+                              const displayStatus = getDisplayStatus(card);
+                              return (
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border whitespace-nowrap ${
+                                    statusStyles[displayStatus] || statusStyles.cancelled
+                                  }`}
+                                >
+                                  {statusIcons[displayStatus]} {statusLabels[displayStatus] || displayStatus}
+                                </span>
+                              );
+                            })()}
                           </td>
 
                           <td className="px-4 lg:px-6 py-4">

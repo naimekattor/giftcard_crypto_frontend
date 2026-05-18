@@ -196,7 +196,8 @@ export default function BuyGiftCardsPage() {
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
   const [ratesLoading, setRatesLoading] = useState(true);
-  const [totalListings, setTotalListings] = useState<number>(0);
+  const [totalActive, setTotalActive] = useState<number>(0);
+  const [totalSold, setTotalSold] = useState<number>(0);
 
   const fetchRates = useCallback(async () => {
     setRatesLoading(true);
@@ -221,7 +222,8 @@ export default function BuyGiftCardsPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/stats`);
       if (res.ok) {
         const data = await res.json();
-        setTotalListings(data.totalListings || 0);
+        setTotalActive(data.totalActive || 0);
+        setTotalSold(data.totalSold || 0);
       }
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -369,7 +371,7 @@ export default function BuyGiftCardsPage() {
           setTimeLeft('EXPIRED');
           setPaymentStep('idle');
           setExpiryTime(null);
-          Swal.fire('Rate Expired', 'The locked exchange rate has expired. Please try again.', 'warning');
+          Swal.fire('Reservation Expired', 'Your 30-minute reservation for this gift card has expired. Please try again — the card has been released back to the marketplace.', 'warning');
         } else {
           const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((distance % (1000 * 60)) / 1000);
@@ -470,10 +472,14 @@ export default function BuyGiftCardsPage() {
 
             {/* Stats Row */}
             <div className="flex flex-wrap gap-4 mt-auto">
-              <Link href="#listings-grid" className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
+              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Listings</div>
-                <div className="text-4xl font-black text-white">{totalListings > 0 ? totalListings : (cardsData?.total || 0)}</div>
-              </Link>
+                <div className="text-4xl font-black text-white">{totalActive > 0 ? totalActive : (cardsData?.total || 0)}</div>
+              </div>
+              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Sold</div>
+                <div className="text-4xl font-black text-white">{totalSold}</div>
+              </div>
               
               <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px]">
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4">Crypto Rails</div>
@@ -673,10 +679,10 @@ export default function BuyGiftCardsPage() {
 
                   {expiryTime && (
                     <div className="bg-cta/20 border border-cta/30 rounded-3xl p-6 backdrop-blur-md animate-pulse">
-                      <div className="text-[10px] font-black text-cta uppercase tracking-widest mb-1">Rate Locked</div>
+                      <div className="text-[10px] font-black text-cta uppercase tracking-widest mb-1">Reservation Locked</div>
                       <div className="flex items-center justify-between">
                         <div className="text-3xl font-black text-white">{timeLeft}</div>
-                        <div className="text-[10px] font-bold text-white/60 uppercase text-right">Remaining time<br/>to pay</div>
+                        <div className="text-[10px] font-bold text-white/60 uppercase text-right">This card is<br/>reserved for you</div>
                       </div>
                     </div>
                   )}
