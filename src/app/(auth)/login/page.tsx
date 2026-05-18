@@ -32,8 +32,8 @@ function LoginPageInner() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-6">
-              <Image src="/logo.png" alt="GiftCard Market" width={150} height={40} />
+          <Link href="/" className="inline-block mb-6 py-4 px-8 bg-transparent border border-white/10 rounded-2xl">
+              <Image src="/logo.png" alt="GiftCard Market" width={150} height={40} style={{ mixBlendMode: 'lighten' }}/>
             </Link>
           <p className="text-slate-400 text-sm">The crypto-powered gift card marketplace</p>
         </div>

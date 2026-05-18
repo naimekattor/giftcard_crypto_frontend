@@ -1,12 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Footer } from '@/components/shared/Footer';
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-[#f5f1e8] text-slate-900 font-sans flex flex-col">
-      <main className="flex-1 pt-24 pb-20">
+    <div className="min-h-screen bg-[#f5f1e8] text-slate-900 font-sans">
+      <main className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-[3rem] shadow-xl p-10 md:p-16 border border-slate-100">
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
@@ -59,7 +58,6 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

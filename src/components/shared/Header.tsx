@@ -8,7 +8,7 @@ import { useLogout } from '@/features/auth/hooks/useAuth';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 
-export const Navigation: React.FC = () => {
+export const Header: React.FC = () => {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const logout = useLogout();
@@ -42,7 +42,7 @@ export const Navigation: React.FC = () => {
             <Link href="/" className={linkClass('/')}>Home</Link>
             <Link href="/buy-gift-cards" className={linkClass('/buy-gift-cards')}>Buy Cards</Link>
             <Link href="/seller" className={linkClass('/seller')}>Sell Cards</Link>
-            <Link href="/how-it-works" className={linkClass('/seller')}>How It Works</Link>
+            <Link href="/how-it-works" className={linkClass('/how-it-works')}>How It Works</Link>
 
             {isAuthenticated ? (
               <>
