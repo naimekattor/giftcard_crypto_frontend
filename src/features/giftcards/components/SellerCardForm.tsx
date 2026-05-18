@@ -225,11 +225,7 @@ export function SellerCardForm() {
       }
     }
 
-    if (!selectedFile) {
-      setApiError('Please upload a screenshot of your gift card before continuing.');
-      return;
-    }
-
+    // Image upload is optional, so no validation is needed.
     setApiError(null);
     setStep(2);
   };
@@ -478,7 +474,7 @@ export function SellerCardForm() {
                     <div className="w-16 h-16 bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Upload className="w-7 h-7 text-slate-300 group-hover:text-brand" />
                     </div>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Upload Card Screenshot'}</p>
+                    <p className="text-sm font-black text-slate-900 uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Upload Card Screenshot (Optional)'}</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">PNG or JPG up to 10MB</p>
                   </label>
                 </div>

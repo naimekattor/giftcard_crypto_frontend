@@ -7,7 +7,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export interface LoginPayload { email: string; password: string; }
 export interface RegisterPayload { email: string; password: string; role: 'buyer' | 'seller'; }
-export interface AuthResult { token: string; role: string; email: string; }
+export interface AuthResult { 
+  token: string; 
+  role: string; 
+  roles?: string[]; 
+  activeRole?: string; 
+  email: string; 
+}
 
 async function request<T>(path: string, options: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -27,7 +33,7 @@ export const authService = {
     });
   },
 
-  async register(payload: RegisterPayload): Promise<{ message: string; id: number }> {
+  async register(payload: RegisterPayload): Promise<{ message: string; id: number; upgraded?: boolean }> {
     return request('/auth/register', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -59,6 +65,28 @@ export const authService = {
     return request('/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify(payload),
+    });
+  },
+
+  async switchRole(role: 'buyer' | 'seller' | 'admin', token: string): Promise<AuthResult> {
+    return request<AuthResult>('/auth/switch-role', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ role }),
+    });
+  },
+
+  async upgradeRole(role: 'buyer' | 'seller', token: string): Promise<AuthResult & { message: string }> {
+    return request<AuthResult & { message: string }>('/auth/upgrade-role', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ role }),
     });
   },
 };

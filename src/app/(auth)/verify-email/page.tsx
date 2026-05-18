@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useVerifyEmail, useResendVerification } from '@/features/auth/hooks/useAuth';
+import Swal from 'sweetalert2';
 
 function VerifyEmailInner() {
   const searchParams = useSearchParams();
@@ -58,7 +59,23 @@ function VerifyEmailInner() {
 
     if (email) {
       verify({ email, code: verificationCode }, {
-        onError: (err: any) => setError(err.message || 'Verification failed'),
+        onError: (err: any) => {
+          if (err.message === 'User already verified' || err.message?.includes('already verified')) {
+            Swal.fire({
+              title: 'Already Verified!',
+              text: 'Your email is already verified. Redirecting to login...',
+              icon: 'success',
+              timer: 3000,
+              showConfirmButton: false,
+              background: '#0f172a',
+              color: '#fff',
+            }).then(() => {
+              router.push('/login');
+            });
+          } else {
+            setError(err.message || 'Verification failed');
+          }
+        },
       });
     }
   };
@@ -69,7 +86,23 @@ function VerifyEmailInner() {
     if (email) {
       resend(email, {
         onSuccess: (data) => setSuccess(data.message),
-        onError: (err: any) => setError(err.message || 'Failed to resend code'),
+        onError: (err: any) => {
+          if (err.message === 'User already verified' || err.message?.includes('already verified')) {
+            Swal.fire({
+              title: 'Already Verified!',
+              text: 'Your email is already verified. Redirecting to login...',
+              icon: 'success',
+              timer: 3000,
+              showConfirmButton: false,
+              background: '#0f172a',
+              color: '#fff',
+            }).then(() => {
+              router.push('/login');
+            });
+          } else {
+            setError(err.message || 'Failed to resend code');
+          }
+        },
       });
     }
   };

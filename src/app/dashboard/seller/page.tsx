@@ -6,7 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 
-import { useAuth, useLogout } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/contexts/AuthContext';
+import { useLogout } from '@/features/auth/hooks/useAuth';
 import { sellerApi, type CardRecord } from '@/services/dashboardApi';
 
 const statusStyles: Record<string, string> = {
@@ -53,7 +54,7 @@ const currencySymbols: Record<string, string> = {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function SellerDashboardPage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, switchActiveRole, upgradeToRole } = useAuth();
   const logout = useLogout();
   const router = useRouter();
 
@@ -229,13 +230,54 @@ export default function SellerDashboardPage() {
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-white/5">
-          <div className="mb-3 px-3 py-2 bg-white/5 rounded-xl">
-            <p className="text-xs text-slate-500">Logged in as</p>
-            <p className="text-sm font-medium text-slate-300 truncate">{user?.email}</p>
-            <span className="inline-block mt-1 text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
-              Seller
-            </span>
+        <div className="p-4 border-t border-white/5 space-y-3">
+          <div className="px-3 py-2.5 bg-white/5 rounded-xl">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Active Account</p>
+            <p className="text-xs font-semibold text-slate-300 truncate mb-2">{user?.email}</p>
+            {user?.roles?.includes('buyer') && user?.roles?.includes('seller') ? (
+              <button
+                onClick={async () => {
+                  try {
+                    await switchActiveRole('buyer');
+                    router.push('/dashboard/buyer');
+                  } catch (err: any) {
+                    Swal.fire({ title: 'Error', text: err.message, icon: 'error', background: '#0f172a', color: '#fff' });
+                  }
+                }}
+                className="w-full py-1.5 px-3 bg-white/5 hover:bg-white/10 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-between border border-white/10"
+              >
+                <span>Switch to Buyer</span>
+                <span>🛒</span>
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  const res = await Swal.fire({
+                    title: 'Become a Buyer?',
+                    text: 'Do you want to buy gift cards on our platform? Upgrade your account instantly!',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, upgrade!',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#334155',
+                    background: '#0f172a',
+                    color: '#fff'
+                  });
+                  if (res.isConfirmed) {
+                    try {
+                      await upgradeToRole('buyer');
+                      router.push('/dashboard/buyer');
+                    } catch (err: any) {
+                      Swal.fire({ title: 'Error', text: err.message, icon: 'error', background: '#0f172a', color: '#fff' });
+                    }
+                  }
+                }}
+                className="w-full py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all text-center"
+              >
+                🚀 Become a Buyer
+              </button>
+            )}
           </div>
           <button
             onClick={logout}

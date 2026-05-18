@@ -14,11 +14,17 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (payload: LoginPayload) => {
       const result = await authService.login(payload);
-      login({ email: result.email, role: result.role as 'buyer' | 'seller', token: result.token });
+      login({ 
+        email: result.email, 
+        role: (result.activeRole || result.role) as 'buyer' | 'seller' | 'admin', 
+        roles: (result.roles || [result.role]) as ('buyer' | 'seller' | 'admin')[],
+        token: result.token 
+      });
       return result;
     },
     onSuccess: (result) => {
-      router.push(result.role === 'seller' ? '/dashboard/seller' : '/dashboard/buyer');
+      const activeRole = result.activeRole || result.role;
+      router.push(activeRole === 'seller' ? '/dashboard/seller' : '/dashboard/buyer');
     },
   });
 }
@@ -28,11 +34,15 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: async (payload: RegisterPayload) => {
-      await authService.register(payload);
-      return payload.email;
+      const res = await authService.register(payload);
+      return { email: payload.email, upgraded: res.upgraded };
     },
-    onSuccess: (email) => {
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    onSuccess: (data) => {
+      if (data.upgraded) {
+        router.push('/login?upgraded=true');
+      } else {
+        router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+      }
     },
   });
 }

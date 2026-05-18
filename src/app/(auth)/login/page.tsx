@@ -11,6 +11,7 @@ function LoginPageInner() {
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
   const reset = searchParams.get('reset');
+  const upgraded = searchParams.get('upgraded');
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +53,12 @@ function LoginPageInner() {
           {reset && (
             <div className="mb-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl px-4 py-3 text-sm font-medium">
               ✓ Password reset! Please log in with your new password.
+            </div>
+          )}
+
+          {upgraded && (
+            <div className="mb-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl px-4 py-3 text-sm font-medium">
+              ✓ Role attached successfully! Please log in to your account.
             </div>
           )}
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useRegister } from '@/features/auth/hooks/useAuth';
 import Image from 'next/image';
 
@@ -9,6 +10,7 @@ type Role = 'buyer' | 'seller';
 
 export default function SignupPage() {
   const { mutate: register, isPending } = useRegister();
+  const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', role: 'buyer' as Role });
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +26,13 @@ export default function SignupPage() {
       return;
     }
     register({ email: form.email, password: form.password, role: form.role }, {
+      onSuccess: (data) => {
+        if (data.upgraded) {
+          router.push('/login?upgraded=true');
+        } else {
+          router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+        }
+      },
       onError: (err: any) => setError(err.message || 'Registration failed'),
     });
   };

@@ -1,12 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authService } from '@/features/auth/services/authService';
 
 export type UserRole = 'buyer' | 'seller' | 'admin';
 
 export interface AuthUser {
   email: string;
   role: UserRole;
+  roles: UserRole[];
   token: string;
 }
 
@@ -16,6 +18,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (user: AuthUser) => void;
   logout: () => void;
+  switchActiveRole: (role: UserRole) => Promise<void>;
+  upgradeToRole: (role: 'buyer' | 'seller') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,8 +51,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  const switchActiveRole = async (role: UserRole) => {
+    if (!user) return;
+    try {
+      const res = await authService.switchRole(role, user.token);
+      const updatedUser: AuthUser = {
+        email: res.email,
+        role: (res.activeRole || res.role) as UserRole,
+        roles: (res.roles || [res.role]) as UserRole[],
+        token: res.token,
+      };
+      setUser(updatedUser);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to switch role');
+    }
+  };
+
+  const upgradeToRole = async (role: 'buyer' | 'seller') => {
+    if (!user) return;
+    try {
+      const res = await authService.upgradeRole(role, user.token);
+      const updatedUser: AuthUser = {
+        email: res.email,
+        role: (res.activeRole || res.role) as UserRole,
+        roles: (res.roles || [res.role]) as UserRole[],
+        token: res.token,
+      };
+      setUser(updatedUser);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to upgrade role');
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, switchActiveRole, upgradeToRole }}>
       {children}
     </AuthContext.Provider>
   );
