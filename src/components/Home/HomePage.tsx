@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { useAuth } from '@/features/auth/contexts/AuthContext';
+import { motion } from 'motion/react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,7 +58,7 @@ const features = [
   {
     icon: Zap,
     color: "cta" as const,
-    title: "Lightning Fast Payouts",
+    title: "Fast Payouts",
     desc: "Crypto is transferred into your wallet within as little as 30 minutes.",
   },
 ];
@@ -72,7 +73,7 @@ const howItWorks = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
-    const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-white selection:bg-brand/10 selection:text-brand antialiased overflow-x-hidden">
@@ -89,51 +90,76 @@ export default function HomePage() {
           <div className="text-center max-w-4xl mx-auto">
             
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-slate-50/60 backdrop-blur-md px-4 py-1.5 shadow-xs mb-8 hover:border-slate-300 transition-colors cursor-default">
-              <Sparkles className="h-3.5 w-3.5 text-brand animate-pulse" />
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-slate-50/60 backdrop-blur-md px-4 py-1.5 shadow-xs mb-8 hover:border-slate-300 transition-colors cursor-default"
+            >
+              <Bitcoin className="h-3.5 w-3.5 text-brand animate-pulse" />
               <span className="text-xs font-semibold tracking-wider text-slate-600 uppercase">
                 Buy gift cards with crypto
               </span>
-            </div>
+            </motion.div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6">
+            <motion.h1 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6"
+            >
               Save more on your next purchase with{" "}
               <span className="relative inline-block text-brand">
                 verified gift cards
                 <span className="absolute bottom-1 left-0 w-full h-[6px] bg-brand/10 rounded-full -z-10" />
               </span>
-            </h1>
+            </motion.h1>
 
             {/* Description Subtext */}
-            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
+            <motion.p 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto mb-10 font-medium leading-relaxed"
+            >
               Purchase verified gift cards and enjoy instant digital delivery at discounted rates.
               <span className="block mt-2 text-base font-normal text-slate-500">
                 Browse top retailers and pay securely using cryptocurrency.
               </span>
-            </p>
+            </motion.p>
 
             {/* CTAs */}
             {!isAuthenticated && (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+                className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
+              >
                 <Link href="/signup" className="w-full sm:w-auto">
-                  <Button className="w-full sm:w-auto bg-brand hover:bg-brand/90 text-white text-base font-bold px-8 h-14 rounded-2xl shadow-xl shadow-brand/20 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0">
+                  <Button className="w-full sm:w-auto bg-brand hover:bg-brand/90 text-white text-base font-bold px-8 h-14 rounded-2xl shadow-xl shadow-brand/20 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
                     Start Trading Now
                   </Button>
                 </Link>
                 <Link href="/buy-gift-cards" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto text-base font-semibold px-8 h-14 rounded-2xl border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 shadow-xs transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                    className="w-full sm:w-auto text-base font-semibold px-8 h-14 rounded-2xl border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 shadow-xs transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                   >
                     View Retailers
                   </Button>
                 </Link>
-              </div>
+              </motion.div>
             )}
 
             {/* Interactive Trust Strip */}
-            <div className="inline-flex flex-wrap items-center justify-center gap-x-8 gap-y-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:px-8 shadow-xs backdrop-blur-xs">
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+              className="inline-flex flex-wrap items-center justify-center gap-x-8 gap-y-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:px-8 shadow-xs backdrop-blur-xs"
+            >
               <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-600">
                 <CheckCircle2 className="w-4 h-4 text-brand" />
                 <span>Verified Cards</span>
@@ -141,14 +167,14 @@ export default function HomePage() {
               <div className="w-1.5 h-1.5 rounded-full bg-slate-300 hidden sm:block" />
               <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-600">
                 <Zap className="w-4 h-4 text-cta fill-cta/10" />
-                <span>Lightning Payouts</span>
+                <span>Fast Payouts</span>
               </div>
               <div className="w-1.5 h-1.5 rounded-full bg-slate-300 hidden sm:block" />
               <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-600">
                 <Lock className="w-4 h-4 text-brand" />
                 <span>No KYC Required</span>
               </div>
-            </div>
+            </motion.div>
 
           </div>
         </div>
@@ -171,8 +197,12 @@ export default function HomePage() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div
+                <motion.div
                   key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
                   className="dark-card bg-white p-8 rounded-2xl border border-slate-200/60 shadow-xs hover:shadow-xl hover:border-brand/30 transition-all duration-300 group cursor-default"
                 >
                   <div
@@ -187,7 +217,7 @@ export default function HomePage() {
                   <p className="text-slate-600 text-sm leading-relaxed font-medium">
                     {feature.desc}
                   </p>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -210,9 +240,13 @@ export default function HomePage() {
           {/* Connected Step UI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
             {howItWorks.map((item, idx) => (
-              <div 
+              <motion.div 
                 key={idx} 
-                className="relative bg-slate-50/50 border border-slate-100 rounded-2xl p-8 transition-all duration-300 hover:bg-slate-50"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: idx * 0.12, ease: "easeOut" }}
+                className="relative bg-slate-50/50 border border-slate-100 rounded-2xl p-8 transition-all duration-300 hover:bg-slate-50 hover:border-slate-200 hover:shadow-md"
               >
                 <div className="absolute top-6 right-6 text-4xl font-black text-slate-200/70 select-none tracking-tighter">
                   {item.step}
@@ -226,29 +260,41 @@ export default function HomePage() {
                 <p className="text-slate-500 text-sm font-medium leading-relaxed">
                   {item.desc}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
 
           {/* Interactive Flow Button */}
-          <div className="text-center mt-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-center mt-12"
+          >
             <Link href="/how-it-works" className="inline-block">
               <Button
                 variant="outline"
-                className="group border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-50 rounded-xl px-6 h-11 text-sm font-semibold transition-all duration-200"
+                className="group border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-50 rounded-xl px-6 h-11 text-sm font-semibold transition-all duration-200 cursor-pointer"
               >
                 See the full walkthrough 
                 <ArrowRight className="w-4 h-4 ml-2 inline transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
-          </div>
+          </motion.div>
 
         </div>
       </section>
 
       {/* ── Final CTA Section ── */}
       {!isAuthenticated && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <motion.section 
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24"
+        >
           <div className="bg-slate-900 rounded-[2rem] p-10 md:p-16 text-center text-white shadow-2xl relative overflow-hidden group">
             {/* Modern High-End Gradient Mesh Backgrounds */}
             <div className="absolute -top-24 -right-24 w-80 h-80 bg-brand/20 rounded-full blur-[100px] group-hover:bg-brand/30 transition-colors duration-500" />
@@ -262,13 +308,13 @@ export default function HomePage() {
                 Join thousands of users already buying and selling gift cards anonymously with crypto.
               </p>
               <Link href="/signup" className="inline-block w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-cta hover:bg-cta/90 text-white h-14 px-10 rounded-xl text-base font-bold shadow-xl shadow-cta/20 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <Button className="w-full sm:w-auto bg-cta hover:bg-cta/90 text-white h-14 px-10 rounded-xl text-base font-bold shadow-xl shadow-cta/20 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer">
                   Create Anonymous Account — Free
                 </Button>
               </Link>
             </div>
           </div>
-        </section>
+        </motion.section>
       )}
 
     </div>

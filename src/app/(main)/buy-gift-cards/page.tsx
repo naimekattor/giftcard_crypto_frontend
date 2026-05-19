@@ -17,10 +17,10 @@ import {
   X,
   ExternalLink,
   Loader2,
-  Sparkles ,
-  Search ,
-  Tag ,
-  ShieldCheck ,
+  Sparkles,
+  Search,
+  Tag,
+  ShieldCheck,
   ChevronDown,
   AlertTriangle,
   Lock
@@ -30,6 +30,7 @@ import Swal from 'sweetalert2';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { buyerApi, type CardRecord } from '@/services/dashboardApi';
 import { RecaptchaField } from '@/components/shared/RecaptchaField';
+import { motion, AnimatePresence } from 'motion/react';
 
 const REGIONS = [
   { code: 'USA', flag: '🇺🇸', flagUrl: 'https://flagcdn.com/us.svg', label: 'United States', currency: 'USD', rateKey: 'USD', symbol: '$', warning: '⚠ NOTE – THESE CARDS WILL ONLY WORK IN THE USA' },
@@ -388,115 +389,132 @@ export default function BuyGiftCardsPage() {
       {/* Hero Section */}
       <div className="pt-10 pb-6 mb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#1a1512] rounded-[3.5rem] p-12 md:p-20 text-white relative overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-[#1a1512] rounded-[3.5rem] p-12 md:p-20 text-white relative overflow-hidden"
+          >
             {/* Badge */}
-            <div className="inline-flex items-center gap-4 py-2.5 pl-3 pr-5 rounded-full bg-[#2a2420] border border-white/10 mb-12">
-  {/* Increased to w-24 for absolute clarity of internal elements */}
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="40 20 320 200" 
-    className="w-24 h-auto shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
-  >
-    <defs>
-      {/* High-contrast gloss background for optimal downscaling */}
-      <linearGradient id="signBgPremium" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#ffffff" />
-        <stop offset="100%" stopColor="#f3f4f6" />
-      </linearGradient>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center gap-4 py-2.5 pl-3 pr-5 rounded-full bg-[#2a2420] border border-white/10 mb-12"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="40 20 320 200" 
+                className="w-24 h-auto shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+              >
+                <defs>
+                  <linearGradient id="signBgPremium" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor="#f3f4f6" />
+                  </linearGradient>
 
-      {/* Deep dark frame border */}
-      <linearGradient id="borderGradPremium" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="#374151" />
-        <stop offset="100%" stopColor="#030712" />
-      </linearGradient>
-    </defs>
+                  <linearGradient id="borderGradPremium" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#374151" />
+                    <stop offset="100%" stopColor="#030712" />
+                  </linearGradient>
+                </defs>
 
-    {/* Hanging String (Brightened to pop sharply off the dark background badge) */}
-    <g stroke="#d1d5db" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="200" cy="30" r="4" fill="#f9fafb" stroke="none" />
-      <path d="M 200,30 L 105,100 M 200,30 L 295,100" />
-    </g>
+                <g stroke="#d1d5db" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="200" cy="30" r="4" fill="#f9fafb" stroke="none" />
+                  <path d="M 200,30 L 105,100 M 200,30 L 295,100" />
+                </g>
 
-    {/* Signboard Matrix (Organic -3 degree tilt) */}
-    <g transform="rotate(-3, 200, 140)">
-      {/* Outer Frame casing */}
-      <rect x="50" y="100" width="300" height="110" rx="10" fill="url(#borderGradPremium)" />
-      
-      {/* Inner Plate display */}
-      <rect x="55" y="105" width="290" height="100" rx="7" fill="url(#signBgPremium)" />
+                <g transform="rotate(-3, 200, 140)">
+                  <rect x="50" y="100" width="300" height="110" rx="10" fill="url(#borderGradPremium)" />
+                  <rect x="55" y="105" width="290" height="100" rx="7" fill="url(#signBgPremium)" />
+                  <circle cx="105" cy="100" r="3" fill="#030712" />
+                  <circle cx="295" cy="100" r="3" fill="#030712" />
 
-      {/* Mechanical hanging loop holes */}
-      <circle cx="105" cy="100" r="3" fill="#030712" />
-      <circle cx="295" cy="100" r="3" fill="#030712" />
+                  <g transform="translate(66, 121)">
+                    <circle cx="28" cy="32" r="23" fill="#f2a900" />
+                    <circle cx="28" cy="32" r="19" fill="#ffffff" />
+                    <path 
+                      d="M 32,21 
+                         A 11,11 0 1,0 32,43 
+                         M 24,15 L 24,20 
+                         M 28,15 L 28,20 
+                         M 24,44 L 24,49 
+                         M 28,44 L 28,49" 
+                      fill="none" 
+                      stroke="#f2a900" 
+                      strokeWidth="4" 
+                      strokeLinecap="round" 
+                    />
+                  </g>
 
-      {/* High-visibility Crypto/Bitcoin Medallion */}
-      <g transform="translate(66, 121)">
-        <circle cx="28" cy="32" r="23" fill="#f2a900" />
-        <circle cx="28" cy="32" r="19" fill="#ffffff" />
-        <path 
-          d="M 32,21 
-             A 11,11 0 1,0 32,43 
-             M 24,15 L 24,20 
-             M 28,15 L 28,20 
-             M 24,44 L 24,49 
-             M 28,44 L 28,49" 
-          fill="none" 
-          stroke="#f2a900" 
-          strokeWidth="4" 
-          strokeLinecap="round" 
-        />
-      </g>
+                  <g font-family="system-ui, -apple-system, sans-serif" font-weight="900">
+                    <text x="132" y="152" font-size="33" fill="#030712" letterSpacing="0.5">CRYPTO</text>
+                    <text x="134" y="182" font-size="14.5" font-weight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
+                  </g>
+                </g>
+              </svg>
 
-      {/* Internal Typography (Thickened text-weights for micro readability) */}
-      <g font-family="system-ui, -apple-system, sans-serif" font-weight="900">
-        <text x="132" y="152" font-size="33" fill="#030712" letterSpacing="0.5">CRYPTO</text>
-        <text x="134" y="182" font-size="14.5" font-weight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
-      </g>
-    </g>
-  </svg>
-
-  {/* Main Action Text Copy */}
-  <span className="text-[11px] font-bold uppercase tracking-wider text-white/90">
-    Buy gift cards with crypto
-  </span>
-</div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white/90">
+                Buy gift cards with crypto
+              </span>
+            </motion.div>
 
             {/* Content */}
             <div className="max-w-4xl">
-              <h1 className="font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+                className="font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl"
+              >
                 Save money on your next shop by purchasing our <span className="text-blue-500">verified gift cards</span>, with fast delivery times.
-              </h1>
-              <p className="text-lg text-white/60 max-w-xl font-medium leading-relaxed mb-16">
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                className="text-lg text-white/60 max-w-xl font-medium leading-relaxed mb-16"
+              >
                 Browse our store for great discounts on major retailers using cryptocurrency, no questions asked.
-              </p>
+              </motion.p>
             </div>
 
             {/* Stats Row */}
-            <div className="flex flex-wrap gap-4 mt-auto">
-              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-wrap gap-4 mt-auto"
+            >
+              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group cursor-default">
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Listings</div>
                 <div className="text-4xl font-black text-white">{totalActive > 0 ? totalActive : (cardsData?.total || 0)}</div>
               </div>
-              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group">
+              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group cursor-default">
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Sold</div>
                 <div className="text-4xl font-black text-white">{totalSold}</div>
               </div>
               
-              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px]">
+              <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px] cursor-default">
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4">Crypto Rails</div>
                 <div className="text-lg font-semibold text-white ">Over 50 crypto<br/>currencies accepted</div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Decorative element */}
             <div className="absolute top-1/2 right-0 -translate-y-1/2 w-64 h-64 bg-brand/5 blur-[100px] pointer-events-none" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
         {/* Region Selector Card */}
-        <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 p-6 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 p-6 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6"
+        >
           <div className="flex items-center gap-6 w-full md:w-auto">
             <div className="space-y-1.5 w-full md:w-64 relative z-50">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Select Region</label>
@@ -517,38 +535,46 @@ export default function BuyGiftCardsPage() {
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {isRegionDropdownOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setIsRegionDropdownOpen(false)}
-                    />
-                    <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl shadow-slate-200/50 py-2 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                      {REGIONS.map(r => (
-                        <button
-                          key={r.code}
-                          type="button"
-                          onClick={() => {
-                            setSelectedRegion(r);
-                            setIsRegionDropdownOpen(false);
-                          }}
-                          className={`w-full px-5 py-3 text-left text-sm font-bold flex items-center gap-3 transition-colors ${
-                            selectedRegion.code === r.code 
-                              ? 'bg-slate-50 text-brand' 
-                              : 'text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          <img 
-                            src={r.flagUrl} 
-                            alt="" 
-                            className="w-6 h-4 object-cover rounded-sm shadow-sm"
-                          />
-                          <span>{r.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                <AnimatePresence>
+                  {isRegionDropdownOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setIsRegionDropdownOpen(false)}
+                      />
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl shadow-slate-200/50 py-2 z-50 overflow-hidden"
+                      >
+                        {REGIONS.map(r => (
+                          <button
+                            key={r.code}
+                            type="button"
+                            onClick={() => {
+                              setSelectedRegion(r);
+                              setIsRegionDropdownOpen(false);
+                            }}
+                            className={`w-full px-5 py-3 text-left text-sm font-bold flex items-center gap-3 transition-colors cursor-pointer ${
+                              selectedRegion.code === r.code 
+                                ? 'bg-slate-50 text-brand' 
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            <img 
+                              src={r.flagUrl} 
+                              alt="" 
+                              className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                            />
+                            <span>{r.label}</span>
+                          </button>
+                        ))}
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -571,13 +597,18 @@ export default function BuyGiftCardsPage() {
               className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-5 text-sm font-bold outline-none focus:border-brand transition-all"
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Warning Banner */}
-        <div className="mt-6 flex items-center gap-4 bg-red-50 border-2 border-red-100 p-4 rounded-2xl text-red-700">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+          className="mt-6 flex items-center gap-4 bg-red-50 border-2 border-red-100 p-4 rounded-2xl text-red-700"
+        >
           <AlertTriangle className="w-6 h-6 shrink-0" />
           <p className="font-black tracking-tight text-sm uppercase">{selectedRegion.warning}</p>
-        </div>
+        </motion.div>
 
         {/* Grid */}
         <div id="listings-grid" className="mt-12">
@@ -592,7 +623,7 @@ export default function BuyGiftCardsPage() {
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 outline-none focus:border-brand"
+                className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 outline-none focus:border-brand cursor-pointer"
               >
                 <option value="featured">Newest first</option>
                 <option value="price-low">Price: Low to High</option>
@@ -607,11 +638,15 @@ export default function BuyGiftCardsPage() {
             </div>
           ) : sortedCards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {sortedCards.map((card) => {
+              {sortedCards.map((card, idx) => {
                 const theme = getRetailerTheme(card.retailer || '');
                 return (
-                  <div 
+                  <motion.div 
                     key={card.id} 
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.5, delay: Math.min(idx * 0.06, 0.3), ease: "easeOut" }}
                     className="group relative flex flex-col bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1.5 transition-all cursor-default overflow-hidden"
                   >
                     {/* Card Top */}
@@ -673,7 +708,7 @@ export default function BuyGiftCardsPage() {
                         Buy with Crypto <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -688,217 +723,234 @@ export default function BuyGiftCardsPage() {
       </div>
 
       {/* Checkout Modal */}
-      {selectedCard && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setSelectedCard(null)} />
-          <div className="relative w-full max-w-4xl bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-            <button onClick={() => setSelectedCard(null)} className="absolute right-6 top-6 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white lg:text-slate-900 lg:bg-slate-100 transition-all">
-              <X className="w-5 h-5" />
-            </button>
+      <AnimatePresence>
+        {selectedCard && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" 
+              onClick={() => setSelectedCard(null)} 
+            />
+            <motion.div 
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.98 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="relative w-full max-w-4xl bg-white rounded-[3rem] shadow-2xl overflow-hidden z-10"
+            >
+              <button 
+                onClick={() => setSelectedCard(null)} 
+                className="absolute right-6 top-6 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white lg:text-slate-900 lg:bg-slate-100 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
-              {/* Modal Side */}
-              <div className={`relative p-10 flex flex-col justify-between text-white bg-gradient-to-br ${getRetailerTheme(selectedCard.retailer || '').brand}`}>
-                <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailer || '').texture}`} />
-                <div className="relative">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest mb-8">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Checkout
+              <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+                {/* Modal Side */}
+                <div className={`relative p-10 flex flex-col justify-between text-white bg-gradient-to-br ${getRetailerTheme(selectedCard.retailer || '').brand}`}>
+                  <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailer || '').texture}`} />
+                  <div className="relative">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest mb-8">
+                      <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Checkout
+                    </div>
+                    <h2 className="text-5xl font-black tracking-tight mb-4">{selectedCard.retailer}</h2>
+                    <p className="text-white/60 font-medium leading-relaxed">Verified gift card for {selectedCard.region}. Instant revelation after confirmation.</p>
                   </div>
-                  <h2 className="text-5xl font-black tracking-tight mb-4">{selectedCard.retailer}</h2>
-                  <p className="text-white/60 font-medium leading-relaxed">Verified gift card for {selectedCard.region}. Instant revelation after confirmation.</p>
-                </div>
 
-                <div className="relative space-y-8">
-                  <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
-                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">Order Summary</div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-end">
-                        <span className="text-sm font-bold text-white/60">Gift Card Value</span>
-                        <span className="text-2xl font-black">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price || 0, selectedCard.currency || 'USD')}</span>
-                      </div>
-                      <div className="flex justify-between items-end border-t border-white/10 pt-4">
-                        <span className="text-sm font-bold text-white/60">You Pay (ETH)</span>
-                        <span className="text-2xl font-black text-emerald-400">≈ {estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
+                  <div className="relative space-y-8">
+                    <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+                      <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">Order Summary</div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-end">
+                          <span className="text-sm font-bold text-white/60">Gift Card Value</span>
+                          <span className="text-2xl font-black">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price || 0, selectedCard.currency || 'USD')}</span>
+                        </div>
+                        <div className="flex justify-between items-end border-t border-white/10 pt-4">
+                          <span className="text-sm font-bold text-white/60">You Pay (ETH)</span>
+                          <span className="text-2xl font-black text-emerald-400">≈ {estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {expiryTime && (
-                    <div className="bg-cta/20 border border-cta/30 rounded-3xl p-6 backdrop-blur-md animate-pulse">
-                      <div className="text-[10px] font-black text-cta uppercase tracking-widest mb-1">Reservation Locked</div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-3xl font-black text-white">{timeLeft}</div>
-                        <div className="text-[10px] font-bold text-white/60 uppercase text-right">This card is<br/>reserved for you</div>
+                    {expiryTime && (
+                      <div className="bg-cta/20 border border-cta/30 rounded-3xl p-6 backdrop-blur-md animate-pulse">
+                        <div className="text-[10px] font-black text-cta uppercase tracking-widest mb-1">Reservation Locked</div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-3xl font-black text-white">{timeLeft}</div>
+                          <div className="text-[10px] font-bold text-white/60 uppercase text-right">This card is<br/>reserved for you</div>
+                        </div>
                       </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-10">
+                  {paymentStep === 'captcha' && (
+                    <div className="h-full flex flex-col justify-center text-center">
+                      <Lock className="w-16 h-16 text-slate-100 mx-auto mb-6" />
+                      <h3 className="text-3xl font-black text-slate-900 mb-2">Bot Protection</h3>
+                      <p className="text-slate-500 font-medium mb-8">Please complete the captcha to proceed with your order.</p>
+                      <RecaptchaField onVerify={handleCaptchaVerify} />
+                    </div>
+                  )}
+
+                  {paymentStep === 'idle' && (
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-3xl font-black text-slate-900 mb-2">Payment Details</h3>
+                        <p className="text-slate-500 font-medium">Complete payment via MetaMask to reveal code.</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white">
+                              <Bitcoin className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <div className="font-black text-slate-900">Ethereum</div>
+                              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sepolia Network</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ETA</div>
+                            <div className="font-bold text-slate-700">~30s</div>
+                          </div>
+                        </div>
+
+                        <div className="bg-[#fcfaf7] border border-slate-200 rounded-[2rem] p-6 space-y-4">
+                          <div className="flex justify-between items-center text-sm font-bold">
+                            <span className="text-slate-400 uppercase tracking-widest">Total ETH</span>
+                            <span className="text-slate-900">{estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm font-bold">
+                            <span className="text-slate-400 uppercase tracking-widest">Network Fee</span>
+                            <span className="text-emerald-600">Included</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={handlePayment}
+                        className="w-full h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand/20 cursor-pointer"
+                      >
+                        Pay with MetaMask <Wallet className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+
+                  {['connecting', 'paying', 'confirming'].includes(paymentStep) && (
+                    <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+                      <div className="relative">
+                        <div className="w-24 h-24 border-4 border-slate-100 border-t-brand rounded-full animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="w-8 h-8 text-brand animate-pulse" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-black text-slate-900 mb-2">
+                          {paymentStep === 'connecting' && 'Connecting...'}
+                          {paymentStep === 'paying' && 'Confirm Payment'}
+                          {paymentStep === 'confirming' && 'Processing...'}
+                        </h3>
+                        <p className="text-slate-500 font-medium max-w-xs mx-auto">
+                          {paymentStep === 'confirming' ? 'Waiting for blockchain confirmation...' : 'Please follow instructions in MetaMask.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentStep === 'success' && (
+                    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                      <div className="text-center">
+                        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                          <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                        </div>
+                        <h3 className="text-3xl font-black text-slate-900 mb-2">Code Unlocked!</h3>
+                        <p className="text-slate-500 font-medium">Your payment has been verified on the blockchain.</p>
+                      </div>
+
+                      <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-8 space-y-6">
+                        <div className="space-y-2">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Card Code</div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
+                              {purchasedCard?.card_code || '•••• •••• •••• ••••'}
+                            </div>
+                            <button 
+                              onClick={() => {
+                                navigator.clipboard.writeText(purchasedCard?.card_code || '');
+                                setCodeCopied(true);
+                                setTimeout(() => setCodeCopied(false), 2000);
+                              }}
+                              className="h-14 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
+                            >
+                              <Copy className={`w-5 h-5 ${codeCopied ? 'text-emerald-500' : 'text-slate-400'}`} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {purchasedCard?.card_pin && (
+                          <div className="space-y-2">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security PIN</div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
+                                {purchasedCard.card_pin}
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(purchasedCard.card_pin || '');
+                                  setPinCopied(true);
+                                  setTimeout(() => setPinCopied(false), 2000);
+                                }}
+                                className="h-14 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
+                              >
+                                <Copy className={`w-5 h-5 ${pinCopied ? 'text-emerald-500' : 'text-slate-400'}`} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <button 
+                        onClick={() => setSelectedCard(null)}
+                        className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest transition-all cursor-pointer"
+                      >
+                        Close Order
+                      </button>
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Modal Content */}
-              <div className="p-10">
-                {paymentStep === 'captcha' && (
-                  <div className="h-full flex flex-col justify-center text-center">
-                    <Lock className="w-16 h-16 text-slate-100 mx-auto mb-6" />
-                    <h3 className="text-3xl font-black text-slate-900 mb-2">Bot Protection</h3>
-                    <p className="text-slate-500 font-medium mb-8">Please complete the captcha to proceed with your order.</p>
-                    <RecaptchaField onVerify={handleCaptchaVerify} />
-                  </div>
-                )}
-
-                {paymentStep === 'idle' && (
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="text-3xl font-black text-slate-900 mb-2">Payment Details</h3>
-                      <p className="text-slate-500 font-medium">Complete payment via MetaMask to reveal code.</p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white">
-                            <Bitcoin className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <div className="font-black text-slate-900">Ethereum</div>
-                            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sepolia Network</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ETA</div>
-                          <div className="font-bold text-slate-700">~30s</div>
-                        </div>
-                      </div>
-
-                      <div className="bg-[#fcfaf7] border border-slate-200 rounded-[2rem] p-6 space-y-4">
-                        <div className="flex justify-between items-center text-sm font-bold">
-                          <span className="text-slate-400 uppercase tracking-widest">Total ETH</span>
-                          <span className="text-slate-900">{estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm font-bold">
-                          <span className="text-slate-400 uppercase tracking-widest">Network Fee</span>
-                          <span className="text-emerald-600">Included</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={handlePayment}
-                      className="w-full h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand/20"
-                    >
-                      Pay with MetaMask <Wallet className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
-
-                {['connecting', 'paying', 'confirming'].includes(paymentStep) && (
-                  <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
-                    <div className="relative">
-                      <div className="w-24 h-24 border-4 border-slate-100 border-t-brand rounded-full animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 text-brand animate-pulse" />
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-3xl font-black text-slate-900 mb-2">
-                        {paymentStep === 'connecting' && 'Connecting...'}
-                        {paymentStep === 'paying' && 'Confirm Payment'}
-                        {paymentStep === 'confirming' && 'Processing...'}
-                      </h3>
-                      <p className="text-slate-500 font-medium max-w-xs mx-auto">
-                        {paymentStep === 'confirming' ? 'Waiting for blockchain confirmation...' : 'Please follow instructions in MetaMask.'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {paymentStep === 'success' && (
-                  <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="text-center">
-                      <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-                      </div>
-                      <h3 className="text-3xl font-black text-slate-900 mb-2">Code Unlocked!</h3>
-                      <p className="text-slate-500 font-medium">Your payment has been verified on the blockchain.</p>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-8 space-y-6">
-                      <div className="space-y-2">
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Card Code</div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
-                            {purchasedCard?.card_code || '•••• •••• •••• ••••'}
-                          </div>
-                          <button 
-                            onClick={() => {
-                              navigator.clipboard.writeText(purchasedCard?.card_code || '');
-                              setCodeCopied(true);
-                              setTimeout(() => setCodeCopied(false), 2000);
-                            }}
-                            className="h-14 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
-                          >
-                            <Copy className={`w-5 h-5 ${codeCopied ? 'text-emerald-500' : 'text-slate-400'}`} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {purchasedCard?.card_pin && (
-                        <div className="space-y-2">
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security PIN</div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
-                              {purchasedCard.card_pin}
-                            </div>
-                            <button 
-                              onClick={() => {
-                                navigator.clipboard.writeText(purchasedCard.card_pin || '');
-                                setPinCopied(true);
-                                setTimeout(() => setPinCopied(false), 2000);
-                              }}
-                              className="h-14 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
-                            >
-                              <Copy className={`w-5 h-5 ${pinCopied ? 'text-emerald-500' : 'text-slate-400'}`} />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <button 
-                      onClick={() => setSelectedCard(null)}
-                      className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest transition-all"
-                    >
-                      Close Order
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
-
+        )}
+      </AnimatePresence>
 
       <section className="max-w-7xl mx-auto mt-10 rounded-[28px] bg-[#f59f0b] px-6 py-6 text-slate-950 shadow-[0_18px_40px_rgba(245,159,11,0.25)] sm:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="rounded-2xl bg-white/60 p-3">
-                <Tag className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">Sell your gift cards for crypto</h3>
-                <p className="mt-1 max-w-2xl text-sm text-slate-800">
-                  Ready to cash out? List your cards and receive crypto payments directly to your wallet.
-                </p>
-              </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-white/60 p-3">
+              <Tag className="h-5 w-5" />
             </div>
-            <Link href={"/seller"}>
+            <div>
+              <h3 className="text-xl font-semibold">Sell your gift cards for crypto</h3>
+              <p className="mt-1 max-w-2xl text-sm text-slate-800">
+                Ready to cash out? List your cards and receive crypto payments directly to your wallet.
+              </p>
+            </div>
+          </div>
+          <Link href={"/seller"}>
             <button className="cursor-pointer inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800">
               List a card
             </button>
-            </Link>
-          </div>
-        </section>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
