@@ -448,8 +448,8 @@ export default function BuyGiftCardsPage() {
                   </g>
 
                   <g font-family="system-ui, -apple-system, sans-serif" font-weight="900">
-                    <text x="132" y="152" font-size="33" fill="#030712" letterSpacing="0.5">CRYPTO</text>
-                    <text x="134" y="182" font-size="14.5" font-weight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
+                    <text x="132" y="152" fontSize="33" fill="#030712" letterSpacing="0.5">CRYPTO</text>
+                    <text x="134" y="182" fontSize="14.5" font-weight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
                   </g>
                 </g>
               </svg>

@@ -43,12 +43,19 @@ export interface PaymentRecord {
   id: number;
   card_id: number;
   amount: number;
-  status: 'pending' | 'holding' | 'completed' | 'returned';
-  complaint_status: 'none' | 'complained' | 'valid';
+  status: 'pending' | 'holding' | 'completed' | 'returned' | 'disputed' | 'refunded' | 'expired';
+  complaint_status: 'none' | 'complained' | 'valid' | 'under_review' | 'resolved' | 'refunded' | 'completed';
   external_id?: string;
   created_at?: string;
   card?: CardRecord;
   seller_payout_amount?: number;
+
+  isRevealed?: boolean;
+  revealedAt?: string;
+  autoRevealed?: boolean;
+  autoRevealedAt?: string;
+  purchasedAt?: string;
+  revealSource?: 'manual' | 'automatic';
 }
 
 // ── Buyer ────────────────────────────────────────────────────────────────────
@@ -69,6 +76,13 @@ export const buyerApi = {
   confirm: (token: string, paymentId: number) =>
     authFetch<{ message: string }>(
       `/buyer/payments/${paymentId}/confirm`,
+      token,
+      { method: 'POST' }
+    ),
+
+  reveal: (token: string, paymentId: number) =>
+    authFetch<PaymentRecord>(
+      `/buyer/payments/${paymentId}/reveal`,
       token,
       { method: 'POST' }
     ),

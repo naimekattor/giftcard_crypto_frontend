@@ -9,6 +9,58 @@ import { buyerApi, type PaymentRecord } from '@/services/dashboardApi';
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 
+const RevealCountdown = ({ purchasedAt, createdAt }: { purchasedAt?: string; createdAt?: string }) => {
+  const [timeLeft, setTimeLeft] = useState<string>('24:00:00');
+
+  useEffect(() => {
+    const target = new Date(purchasedAt || createdAt || Date.now()).getTime() + 24 * 60 * 60 * 1000;
+    
+    const update = () => {
+      const remaining = target - Date.now();
+      if (remaining <= 0) {
+        setTimeLeft('Auto-Revealed');
+        return;
+      }
+      const hrs = Math.floor(remaining / (3600 * 1000));
+      const mins = Math.floor((remaining % (3600 * 1000)) / (60 * 1000));
+      const secs = Math.floor((remaining % (60 * 1000)) / 1000);
+      setTimeLeft(
+        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      );
+    };
+
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [purchasedAt, createdAt]);
+
+  return <span className="font-mono font-bold text-yellow-500">{timeLeft}</span>;
+};
+
+const RevealedTimeAgo = ({ revealedAt }: { revealedAt: string }) => {
+  const [text, setText] = useState<string>('');
+
+  useEffect(() => {
+    const update = () => {
+      const diffMs = Date.now() - new Date(revealedAt).getTime();
+      const diffMins = Math.floor(diffMs / (60 * 1000));
+      if (diffMins < 1) {
+        setText('just now');
+      } else if (diffMins < 60) {
+        setText(`${diffMins} minute${diffMins > 1 ? 's' : ''} ago`);
+      } else {
+        const diffHrs = Math.floor(diffMins / 60);
+        setText(`${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`);
+      }
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [revealedAt]);
+
+  return <span className="text-emerald-400 font-medium">{text}</span>;
+};
+
 const statusColors: Record<string, string> = {
   pending:   'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
   holding:   'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -163,8 +215,59 @@ export default function BuyerDashboardPage() {
   };
 
   const canViewDetails = (p: PaymentRecord) =>
-    ['holding', 'completed'].includes(p.status) &&
-    Boolean(p.card?.card_code || p.card?.card_pin);
+    ['holding', 'completed', 'disputed'].includes(p.status);
+
+  const handleRevealCode = async (id: number) => {
+    if (!user) return;
+
+    const result = await Swal.fire({
+      title: 'Reveal Gift Card Code?',
+      html: `
+        <div class="text-left space-y-3">
+          <p class="font-bold text-yellow-400">Are you sure you'd like to reveal the gift card?</p>
+          <p class="text-sm text-slate-300">We recommend using your gift card within 2 hours to prevent any gift card issues.</p>
+          <p class="text-xs text-slate-400">You still have 24 hours for any complaints.</p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Yes, Reveal Code',
+      background: '#0f172a',
+      color: '#fff',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
+    setActionLoading(id);
+    try {
+      const updated = await buyerApi.reveal(user.token, id);
+      setPayments(prev => prev.map(p => p.id === id ? updated : p));
+      setRevealed(prev => ({ ...prev, [id]: true }));
+      Swal.fire({
+        title: 'Revealed!',
+        text: 'The gift card details are now visible.',
+        icon: 'success',
+        background: '#0f172a',
+        color: '#fff',
+        confirmButtonColor: '#3b82f6',
+      });
+    } catch (e: any) {
+      Swal.fire({
+        title: 'Error',
+        text: e.message,
+        icon: 'error',
+        background: '#0f172a',
+        color: '#fff',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const toggleReveal = (paymentId: number) =>
     setRevealed((prev) => ({ ...prev, [paymentId]: !prev[paymentId] }));
@@ -390,42 +493,81 @@ export default function BuyerDashboardPage() {
                                 <p className="text-xs text-slate-500 mt-0.5">{p.card?.retailer}</p>
                                 {canViewDetails(p) && (
                                   <div className="mt-2">
-                                    <button
-                                      onClick={() => toggleReveal(p.id)}
-                                      className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-                                    >
-                                      {revealed[p.id] ? 'Hide card details' : 'View card details'}
-                                    </button>
-                                    {revealed[p.id] && (
-                                      <div className="mt-2 grid gap-2 text-xs">
-                                        {p.card?.card_code && (
-                                          <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                                            <div className="min-w-0">
-                                              <p className="text-slate-500">Code</p>
-                                              <p className="text-slate-200 font-mono truncate">{p.card.card_code}</p>
+                                    {p.isRevealed || p.autoRevealed ? (
+                                      <>
+                                        <button
+                                          onClick={() => toggleReveal(p.id)}
+                                          className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                                        >
+                                          {revealed[p.id] ? 'Hide card details' : 'View card details'}
+                                        </button>
+                                        {revealed[p.id] && (
+                                          <div className="mt-2 grid gap-2 text-xs">
+                                            {p.card?.card_code && (
+                                              <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                                <div className="min-w-0">
+                                                  <p className="text-slate-500">Code</p>
+                                                  <p className="text-slate-200 font-mono truncate">{p.card.card_code}</p>
+                                                </div>
+                                                <button
+                                                  onClick={() => copy(p.card?.card_code)}
+                                                  className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                                >
+                                                  Copy
+                                                </button>
+                                              </div>
+                                            )}
+                                            {p.card?.card_pin && (
+                                              <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                                <div className="min-w-0">
+                                                  <p className="text-slate-500">PIN</p>
+                                                  <p className="text-slate-200 font-mono truncate">{p.card.card_pin}</p>
+                                                </div>
+                                                <button
+                                                  onClick={() => copy(p.card?.card_pin)}
+                                                  className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                                >
+                                                  Copy
+                                                </button>
+                                              </div>
+                                            )}
+                                            <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                                              <span>Status:</span>
+                                              <RevealedTimeAgo revealedAt={p.revealedAt || p.autoRevealedAt || p.created_at || ''} />
+                                              {p.autoRevealed && <span className="text-yellow-500/70">(Auto-revealed)</span>}
                                             </div>
-                                            <button
-                                              onClick={() => copy(p.card?.card_code)}
-                                              className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
-                                            >
-                                              Copy
-                                            </button>
+
+                                            {p.status === 'holding' && p.complaint_status === 'none' && (
+                                              <div className="mt-2 bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-[11px] space-y-1">
+                                                <p className="font-semibold text-blue-300">Have you redeemed your gift card yet?</p>
+                                                <p className="text-slate-400">Please confirm if it works to release funds to the seller. You still have the 24h safety escrow window.</p>
+                                              </div>
+                                            )}
                                           </div>
                                         )}
-                                        {p.card?.card_pin && (
-                                          <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                                            <div className="min-w-0">
-                                              <p className="text-slate-500">PIN</p>
-                                              <p className="text-slate-200 font-mono truncate">{p.card.card_pin}</p>
-                                            </div>
-                                            <button
-                                              onClick={() => copy(p.card?.card_pin)}
-                                              className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
-                                            >
-                                              Copy
-                                            </button>
+                                      </>
+                                    ) : (
+                                      <div className="mt-2 flex flex-col gap-2 max-w-[200px] bg-white/5 border border-white/5 p-3 rounded-xl">
+                                        <div className="grid gap-1 text-[11px] text-slate-400 mb-1">
+                                          <div className="flex justify-between">
+                                            <span>Code:</span>
+                                            <span className="font-mono">•••• ••••</span>
                                           </div>
-                                        )}
+                                          <div className="flex justify-between">
+                                            <span>PIN:</span>
+                                            <span className="font-mono">••••</span>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5 pt-2">
+                                          <span>Auto-reveal in:</span>
+                                          <RevealCountdown purchasedAt={p.purchasedAt} createdAt={p.created_at} />
+                                        </div>
+                                        <button
+                                          onClick={() => handleRevealCode(p.id)}
+                                          className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all text-center cursor-pointer"
+                                        >
+                                          REVEAL CODE
+                                        </button>
                                       </div>
                                     )}
                                   </div>
@@ -489,42 +631,81 @@ export default function BuyerDashboardPage() {
                             <p className="text-xs text-slate-500 mt-1">{p.card?.retailer}</p>
                             {canViewDetails(p) && (
                               <div className="mt-2">
-                                <button
-                                  onClick={() => toggleReveal(p.id)}
-                                  className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-                                >
-                                  {revealed[p.id] ? 'Hide card details' : 'View card details'}
-                                </button>
-                                {revealed[p.id] && (
-                                  <div className="mt-2 grid gap-2 text-xs">
-                                    {p.card?.card_code && (
-                                      <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                                        <div className="min-w-0">
-                                          <p className="text-slate-500">Code</p>
-                                          <p className="text-slate-200 font-mono truncate">{p.card.card_code}</p>
+                                {p.isRevealed || p.autoRevealed ? (
+                                  <>
+                                    <button
+                                      onClick={() => toggleReveal(p.id)}
+                                      className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                                    >
+                                      {revealed[p.id] ? 'Hide card details' : 'View card details'}
+                                    </button>
+                                    {revealed[p.id] && (
+                                      <div className="mt-2 grid gap-2 text-xs">
+                                        {p.card?.card_code && (
+                                          <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                            <div className="min-w-0">
+                                              <p className="text-slate-500">Code</p>
+                                              <p className="text-slate-200 font-mono truncate">{p.card.card_code}</p>
+                                            </div>
+                                            <button
+                                              onClick={() => copy(p.card?.card_code)}
+                                              className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                            >
+                                              Copy
+                                            </button>
+                                          </div>
+                                        )}
+                                        {p.card?.card_pin && (
+                                          <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                            <div className="min-w-0">
+                                              <p className="text-slate-500">PIN</p>
+                                              <p className="text-slate-200 font-mono truncate">{p.card.card_pin}</p>
+                                            </div>
+                                            <button
+                                              onClick={() => copy(p.card?.card_pin)}
+                                              className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                                            >
+                                              Copy
+                                            </button>
+                                          </div>
+                                        )}
+                                        <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                                          <span>Status:</span>
+                                          <RevealedTimeAgo revealedAt={p.revealedAt || p.autoRevealedAt || p.created_at || ''} />
+                                          {p.autoRevealed && <span className="text-yellow-500/70">(Auto-revealed)</span>}
                                         </div>
-                                        <button
-                                          onClick={() => copy(p.card?.card_code)}
-                                          className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
-                                        >
-                                          Copy
-                                        </button>
+
+                                        {p.status === 'holding' && p.complaint_status === 'none' && (
+                                          <div className="mt-2 bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-[11px] space-y-1">
+                                            <p className="font-semibold text-blue-300">Have you redeemed your gift card yet?</p>
+                                            <p className="text-slate-400">Please confirm if it works to release funds to the seller. You still have the 24h safety escrow window.</p>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
-                                    {p.card?.card_pin && (
-                                      <div className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                                        <div className="min-w-0">
-                                          <p className="text-slate-500">PIN</p>
-                                          <p className="text-slate-200 font-mono truncate">{p.card.card_pin}</p>
-                                        </div>
-                                        <button
-                                          onClick={() => copy(p.card?.card_pin)}
-                                          className="px-2 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20"
-                                        >
-                                          Copy
-                                        </button>
+                                  </>
+                                ) : (
+                                  <div className="mt-2 flex flex-col gap-2 max-w-[200px] bg-white/5 border border-white/5 p-3 rounded-xl">
+                                    <div className="grid gap-1 text-[11px] text-slate-400 mb-1">
+                                      <div className="flex justify-between">
+                                        <span>Code:</span>
+                                        <span className="font-mono">•••• ••••</span>
                                       </div>
-                                    )}
+                                      <div className="flex justify-between">
+                                        <span>PIN:</span>
+                                        <span className="font-mono">••••</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5 pt-2">
+                                      <span>Auto-reveal in:</span>
+                                      <RevealCountdown purchasedAt={p.purchasedAt} createdAt={p.created_at} />
+                                    </div>
+                                    <button
+                                      onClick={() => handleRevealCode(p.id)}
+                                      className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all text-center cursor-pointer"
+                                    >
+                                      REVEAL CODE
+                                    </button>
                                   </div>
                                 )}
                               </div>
