@@ -125,7 +125,7 @@ function StepCard({ step, variant, index }: StepCardProps) {
       >
         <span
           className={`
-            inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-black
+            inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold
             ${isSell ? "bg-brand" : "bg-cta"}
           `}
         >

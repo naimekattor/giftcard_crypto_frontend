@@ -107,7 +107,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6"
             >
               Save more on your next purchase with{" "}
               <span className="relative inline-block text-brand">
@@ -185,7 +185,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
               WHY TRADERS CHOOSE US
             </h2>
             <p className="text-slate-500 font-medium text-lg">
@@ -229,7 +229,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">
               HOW IT WORKS
             </h2>
             <p className="text-slate-500 font-medium text-lg">
@@ -248,7 +248,7 @@ export default function HomePage() {
                 transition={{ duration: 0.5, delay: idx * 0.12, ease: "easeOut" }}
                 className="relative bg-slate-50/50 border border-slate-100 rounded-2xl p-8 transition-all duration-300 hover:bg-slate-50 hover:border-slate-200 hover:shadow-md"
               >
-                <div className="absolute top-6 right-6 text-4xl font-black text-slate-200/70 select-none tracking-tighter">
+                <div className="absolute top-6 right-6 text-4xl font-bold text-slate-200/70 select-none tracking-tighter">
                   {item.step}
                 </div>
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand text-white text-sm font-bold mb-6 shadow-md shadow-brand/10">
@@ -301,7 +301,7 @@ export default function HomePage() {
             <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-cta/15 rounded-full blur-[100px] group-hover:bg-cta/25 transition-colors duration-500" />
 
             <div className="relative z-10 max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight leading-tight">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
                 Ready to Trade Smarter?
               </h2>
               <p className="text-base md:text-lg text-slate-400 mb-10 font-medium max-w-lg mx-auto">

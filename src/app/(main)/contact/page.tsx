@@ -9,7 +9,7 @@ export default function ContactPage() {
       <main className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-[3rem] shadow-xl p-10 md:p-16 border border-slate-100">
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
               Support & Contact
             </h1>
             <p className="text-lg text-slate-500 mb-12">

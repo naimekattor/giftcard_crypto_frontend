@@ -9,7 +9,7 @@ export default function AboutPage() {
       <main className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-[3rem] shadow-xl p-10 md:p-16 border border-slate-100">
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
               About Us
             </h1>
             <div className="prose prose-slate max-w-none text-slate-600">
@@ -17,7 +17,7 @@ export default function AboutPage() {
                 Welcome to GitCard Crypto, the premier marketplace for buying and selling gift cards anonymously using cryptocurrency. We built this platform to bridge the gap between digital assets and real-world spending power.
               </p>
 
-              <h2 className="text-2xl font-black text-slate-900 mb-4 mt-12">Our Mission</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 mt-12">Our Mission</h2>
               <p className="mb-8">
                 Our mission is to provide a fast, secure, and privacy-focused platform where users can seamlessly exchange cryptocurrency for gift cards from the world's leading retailers, without sacrificing their personal data.
               </p>
@@ -40,7 +40,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-black text-slate-900 mb-4 mt-12">How We Operate</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 mt-12">How We Operate</h2>
               <p>
                 We partner with verified sellers worldwide to bring you an extensive inventory of gift cards at discounted rates. Our automated rate-locking technology ensures that you always get the exact value you pay for, completely insulated from market volatility during the checkout process.
               </p>

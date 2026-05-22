@@ -46,7 +46,7 @@ export const GiftCard = ({ card }: GiftCardProps) => {
         {/* Card Top: Retailer & Security */}
         <div className="relative flex justify-between items-start">
           <div className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg">
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-white uppercase tracking-widest">
               {card.retailer.name}
             </span>
           </div>
@@ -57,7 +57,7 @@ export const GiftCard = ({ card }: GiftCardProps) => {
         <div className="relative flex justify-between items-end">
           <div>
             <p className="text-[9px] font-bold text-white/50 uppercase tracking-[0.2em] mb-1">Face Value</p>
-            <h3 className="text-3xl font-black text-white tracking-tighter">${card.value}</h3>
+            <h3 className="text-3xl font-bold text-white tracking-tighter">${card.value}</h3>
           </div>
           {/* Golden Security Chip */}
           <div className="w-12 h-9 bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 rounded-md opacity-90 border border-white/20 shadow-inner" />
@@ -69,8 +69,8 @@ export const GiftCard = ({ card }: GiftCardProps) => {
         <div className="flex justify-between items-end">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl font-black text-slate-900">${card.price}</span>
-              <span className="bg-[#01aa88]/10 text-[#01aa88] px-2 py-0.5 rounded text-[10px] font-black uppercase">
+              <span className="text-2xl font-bold text-slate-900">${card.price}</span>
+              <span className="bg-[#01aa88]/10 text-[#01aa88] px-2 py-0.5 rounded text-[10px] font-bold uppercase">
                 -{card.discount}% OFF
               </span>
             </div>
@@ -79,7 +79,7 @@ export const GiftCard = ({ card }: GiftCardProps) => {
           <div className="text-right">
             <div className="flex items-center justify-end gap-1 text-[#01aa88] mb-0.5">
               <Zap size={14} fill="currentColor" />
-              <span className="text-[10px] font-black uppercase">Instant</span>
+              <span className="text-[10px] font-bold uppercase">Instant</span>
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Verification</p>
           </div>
@@ -90,7 +90,7 @@ export const GiftCard = ({ card }: GiftCardProps) => {
       <button
         onClick={handlePurchase}
         disabled={purchaseStatus !== 'idle'}
-        className={`w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2
+        className={`w-full h-14 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2
           ${purchaseStatus === 'idle' ? 'bg-[#007bfb] text-white hover:brightness-110 active:scale-95 shadow-lg shadow-[#007bfb]/20' : ''}
           ${purchaseStatus === 'processing' ? 'bg-slate-100 text-slate-400 cursor-wait' : ''}
           ${purchaseStatus === 'completed' ? 'bg-gradient-to-r from-[#01aa88] to-[#05f2ab] text-white animate-in zoom-in-95' : ''}

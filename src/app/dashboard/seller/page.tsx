@@ -314,7 +314,7 @@ export default function SellerDashboardPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-black text-white">Seller Dashboard</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold text-white">Seller Dashboard</h1>
               <p className="text-slate-400 mt-1 text-sm">Manage your gift card listings</p>
             </div>
             <Link href="/seller">
@@ -336,7 +336,7 @@ export default function SellerDashboardPage() {
             ].map((s) => (
               <div key={s.label} className="bg-white/5 rounded-2xl p-4 lg:p-5 shadow-xl border border-white/5">
                 <div className="text-xl lg:text-2xl mb-1 lg:mb-2">{s.icon}</div>
-                <p className="text-xl lg:text-3xl font-black text-white">{s.value}</p>
+                <p className="text-xl lg:text-3xl font-bold text-white">{s.value}</p>
                 <p className="text-white/70 text-xs lg:text-sm mt-1">{s.label}</p>
               </div>
             ))}

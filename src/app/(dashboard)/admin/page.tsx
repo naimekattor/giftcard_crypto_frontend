@@ -197,7 +197,7 @@ export default function AdminDashboard() {
           <main className="flex-1 p-4 sm:p-6 lg:p-8">
             {/* Header */}
             <div className="mb-6 lg:mb-8">
-              <h1 className="text-2xl lg:text-3xl font-black text-white">Admin Dashboard</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold text-white">Admin Dashboard</h1>
               <p className="text-slate-400 mt-1 text-sm">Platform Management & Monitoring</p>
             </div>
 
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
               ].map((s) => (
                 <div key={s.label} className={`bg-gradient-to-br ${s.color} rounded-2xl p-4 lg:p-5 shadow-xl`}>
                   <div className="text-xl lg:text-2xl mb-1 lg:mb-2">{s.icon}</div>
-                  <p className="text-lg lg:text-2xl font-black text-white">{s.value}</p>
+                  <p className="text-lg lg:text-2xl font-bold text-white">{s.value}</p>
                   <p className="text-white/70 text-xs lg:text-sm mt-1">{s.label}</p>
                 </div>
               ))}

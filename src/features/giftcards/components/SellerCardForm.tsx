@@ -283,16 +283,16 @@ export function SellerCardForm() {
         <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
           <ShieldCheck className="w-12 h-12 text-emerald-500" />
         </div>
-        <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Listing Submitted!</h2>
+        <h2 className="text-4xl font-bold text-slate-900 mb-4 ">Listing Submitted!</h2>
         <p className="text-slate-500 mb-10 max-w-sm mx-auto font-medium">
           Your card has been submitted and is <span className="text-brand font-bold uppercase">Pending Admin Approval</span>. 
           It will be live in the marketplace once approved. You will receive <span className="text-slate-900 font-bold">{regionMeta.symbol}{pricing?.sellerReceives.toFixed(2)}</span> to your wallet once sold.
         </p>
         <div className="flex flex-col gap-3 justify-center">
-          <button onClick={() => { setSuccess(false); setStep(1); setCaptchaToken(null); }} className="w-full h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-brand/20">
+          <button onClick={() => { setSuccess(false); setStep(1); setCaptchaToken(null); }} className="w-full h-16 cursor-pointer bg-brand hover:bg-brand/90 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-xl shadow-brand/20">
             List Another Card
           </button>
-          <a href="/dashboard/seller" className="w-full h-16 border-2 border-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center">
+          <a href="/dashboard/seller" className="w-full h-16 border-2 border-slate-100 text-slate-600 rounded-2xl font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center">
             Go to Dashboard
           </a>
         </div>
@@ -306,7 +306,7 @@ export function SellerCardForm() {
       <div className="flex justify-between items-center mb-12 px-6">
         {[1, 2].map((s) => (
           <React.Fragment key={s}>
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm transition-all ${
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm transition-all ${
               step >= s ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20' : 'bg-slate-100 text-slate-400'
             }`}>
               {step > s ? '✓' : s}
@@ -328,13 +328,13 @@ export function SellerCardForm() {
           {step === 1 ? (
             <motion.div key="step1" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-8">
               <div>
-                <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Card Information</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Card Information</h2>
                 <p className="text-slate-500 font-medium">Verify your region and retailer details.</p>
               </div>
 
               {/* Region */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Globe className="w-4 h-4" /> 01. Select Region
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -344,7 +344,7 @@ export function SellerCardForm() {
                     }`}>
                       <input type="radio" {...register('region')} value={r.code} className="sr-only" />
                       <span className="text-3xl group-hover:scale-110 transition-transform">{r.flag}</span>
-                      <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{r.code}</span>
+                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{r.code}</span>
                     </label>
                   ))}
                 </div>
@@ -353,7 +353,7 @@ export function SellerCardForm() {
               {/* Retailer & Price */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">02. Retailer</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">02. Retailer</label>
                   <select {...register('retailer')} className="w-full h-16 rounded-2xl border-2 border-slate-50 bg-slate-50 px-5 text-sm font-bold text-slate-900 outline-none focus:border-brand focus:bg-white transition-all appearance-none cursor-pointer">
                     <option value="">Select retailer…</option>
                     {availableRetailers.map(r => <option key={r} value={r}>{r}</option>)}
@@ -361,9 +361,9 @@ export function SellerCardForm() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">03. Gift Card Value</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">03. Gift Card Value</label>
                   <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">{regionMeta.symbol}</span>
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{regionMeta.symbol}</span>
                     <input type="text" placeholder="50.00" {...register('price')} className="w-full h-16 rounded-2xl border-2 border-slate-50 bg-slate-50 pl-12 pr-5 text-sm font-bold text-slate-900 outline-none focus:border-brand focus:bg-white transition-all" />
                   </div>
                 </div>
@@ -374,11 +374,11 @@ export function SellerCardForm() {
                 <div className="bg-slate-900 rounded-3xl p-8 text-white space-y-6 shadow-xl shadow-slate-900/20">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">You will receive</div>
-                      <div className="text-4xl font-black text-brand tracking-tight">{regionMeta.symbol}{pricing.sellerReceives.toFixed(2)}</div>
+                      <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">You will receive</div>
+                      <div className="text-4xl font-bold text-brand tracking-tight">{regionMeta.symbol}{pricing.sellerReceives.toFixed(2)}</div>
                     </div>
                     {/* <div className="text-right">
-                      <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Platform Charge</div>
+                      <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Platform Charge</div>
                       <div className="text-sm font-bold text-white/80">{regionMeta.symbol}{pricing.charge.toFixed(2)} ({pricing.rateLabel})</div>
                     </div> */}
                   </div>
@@ -395,7 +395,7 @@ export function SellerCardForm() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">04. Gift Card Code</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">04. Gift Card Code</label>
                     <input
                       type="text"
                       placeholder="XXXX-XXXX-XXXX"
@@ -435,7 +435,7 @@ export function SellerCardForm() {
                     )}
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">05. Security PIN (If any)</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">05. Security PIN (If any)</label>
                     <input
                       type="text"
                       placeholder="1234"
@@ -474,20 +474,20 @@ export function SellerCardForm() {
                     <div className="w-16 h-16 bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Upload className="w-7 h-7 text-slate-300 group-hover:text-brand" />
                     </div>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Upload Card Screenshot (Optional)'}</p>
+                    <p className="text-sm font-bold text-slate-900 uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Upload Card Screenshot (Optional)'}</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">PNG or JPG up to 10MB</p>
                   </label>
                 </div>
               </div>
 
-              <button type="button" onClick={nextStep} className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20">
+              <button type="button" onClick={nextStep} className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20">
                 Continue to Payout <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           ) : (
             <motion.div key="step2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-8">
               <div>
-                <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Payout Wallet</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Payout Wallet</h2>
                 <p className="text-slate-500 font-medium">Where should we send your {regionMeta.currency} earnings?</p>
               </div>
               {/* Summary */}
@@ -535,15 +535,15 @@ export function SellerCardForm() {
 
               <div className="space-y-6">
                 <div className="text-center">
-                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Verification Required</div>
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Verification Required</div>
                    <RecaptchaField onVerify={setCaptchaToken} />
                 </div>
 
                 <div className="flex gap-4">
-                  <button type="button" onClick={prevStep} className="flex-1 h-16 border-2 border-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+                  <button type="button" onClick={prevStep} className="flex-1 h-16 border-2 border-slate-100 text-slate-600 rounded-2xl font-bold uppercase tracking-widest hover:bg-slate-50 transition-all">
                     Back
                   </button>
-                  <button type="submit" disabled={isSubmitting || !captchaToken} className="flex-[2] h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all disabled:opacity-30 shadow-xl shadow-brand/20">
+                  <button type="submit" disabled={isSubmitting || !captchaToken} className="flex-[2] h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all disabled:opacity-30 shadow-xl shadow-brand/20">
                     {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Finalize Listing <Plus className="w-5 h-5" /></>}
                   </button>
                 </div>

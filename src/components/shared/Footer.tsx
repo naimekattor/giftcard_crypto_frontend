@@ -80,7 +80,7 @@ export const Footer = () => {
             © 2026 GiftCard Market. Decentralised Peer-to-Peer Trading.
           </p>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-status-completed" /> 
               Global Infrastructure Active
             </div>

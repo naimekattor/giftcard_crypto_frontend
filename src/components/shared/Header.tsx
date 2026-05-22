@@ -121,7 +121,7 @@ export const Header: React.FC = () => {
                     <button
                       onClick={() => setDropdownOpen(!dropdownOpen)}
                       disabled={switching}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-lg transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all disabled:opacity-50"
                     >
                       <span>Mode: {user?.role === 'seller' ? 'Seller 💳' : 'Buyer 🛒'}</span>
                       <ChevronDown size={14} className={`transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -153,7 +153,7 @@ export const Header: React.FC = () => {
                   <button
                     onClick={() => handleUpgrade(user?.role === 'buyer' ? 'seller' : 'buyer')}
                     disabled={switching}
-                    className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
                       user?.role === 'buyer'
                         ? 'bg-orange-500/10 text-orange-600 border border-orange-500/20 hover:bg-orange-500/20'
                         : 'bg-blue-500/10 text-blue-600 border border-blue-500/20 hover:bg-blue-500/20'
@@ -232,7 +232,7 @@ export const Header: React.FC = () => {
                     <button
                       onClick={() => handleUpgrade(user?.role === 'buyer' ? 'seller' : 'buyer')}
                       disabled={switching}
-                      className={`w-full py-2 px-3 rounded-lg text-xs font-black text-center transition-all disabled:opacity-50 ${
+                      className={`w-full py-2 px-3 rounded-lg text-xs font-bold text-center transition-all disabled:opacity-50 ${
                         user?.role === 'buyer' ? 'bg-orange-600 text-white' : 'bg-blue-600 text-white'
                       }`}
                     >

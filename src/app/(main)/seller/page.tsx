@@ -11,7 +11,7 @@ export default function SellerPage() {
       {/* Hero Section */}
       <div className="bg-white border-b border-slate-200 pt-16 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
             Sell Your Gift Cards <span className="text-brand">Anonymously</span>
           </h1>
           <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium">
@@ -59,7 +59,7 @@ export default function SellerPage() {
             </div>
 
             <div className="p-8 bg-slate-900 rounded-[2rem] text-white">
-              <h4 className="font-black mb-2 tracking-tight">NEED HELP?</h4>
+              <h4 className="font-bold mb-2 tracking-tight">NEED HELP?</h4>
               <p className="text-sm text-slate-400 font-medium mb-6">Our support team is available 24/7 via Telegram.</p>
               <Link href={"/contact"}>
               <button className=" cursor-pointer w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-xl transition-colors text-sm">

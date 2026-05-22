@@ -447,9 +447,9 @@ export default function BuyGiftCardsPage() {
                     />
                   </g>
 
-                  <g font-family="system-ui, -apple-system, sans-serif" font-weight="900">
+                  <g fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900">
                     <text x="132" y="152" fontSize="33" fill="#030712" letterSpacing="0.5">CRYPTO</text>
-                    <text x="134" y="182" fontSize="14.5" font-weight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
+                    <text x="134" y="182" fontSize="14.5" fontWeight="900" fill="#374151" letterSpacing="0.2">ACCEPTED HERE</text>
                   </g>
                 </g>
               </svg>
@@ -487,16 +487,16 @@ export default function BuyGiftCardsPage() {
               className="flex flex-wrap gap-4 mt-auto"
             >
               <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group cursor-default">
-                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Listings</div>
-                <div className="text-4xl font-black text-white">{totalActive > 0 ? totalActive : (cardsData?.total || 0)}</div>
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Listings</div>
+                <div className="text-4xl font-bold text-white">{totalActive > 0 ? totalActive : (cardsData?.total || 0)}</div>
               </div>
               <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[180px] hover:bg-[#352e2a] transition-all group cursor-default">
-                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Sold</div>
-                <div className="text-4xl font-black text-white">{totalSold}</div>
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4 group-hover:text-brand transition-colors">Total Sold</div>
+                <div className="text-4xl font-bold text-white">{totalSold}</div>
               </div>
               
               <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px] cursor-default">
-                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4">Crypto Rails</div>
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">Crypto Rails</div>
                 <div className="text-lg font-semibold text-white ">Over 50 crypto<br/>currencies accepted</div>
               </div>
             </motion.div>
@@ -517,7 +517,7 @@ export default function BuyGiftCardsPage() {
         >
           <div className="flex items-center gap-6 w-full md:w-auto">
             <div className="space-y-1.5 w-full md:w-64 relative z-50">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Select Region</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Select Region</label>
               <div className="relative">
                 <button 
                   type="button"
@@ -579,7 +579,7 @@ export default function BuyGiftCardsPage() {
             </div>
 
             <div className="hidden lg:flex flex-col gap-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Rates</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Rates</div>
               <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                 1 USD = {selectedRegion.symbol}{(rates[selectedRegion.rateKey] || 1).toFixed(3)}
@@ -607,14 +607,14 @@ export default function BuyGiftCardsPage() {
           className="mt-6 flex items-center gap-4 bg-red-50 border-2 border-red-100 p-4 rounded-2xl text-red-700"
         >
           <AlertTriangle className="w-6 h-6 shrink-0" />
-          <p className="font-black tracking-tight text-sm uppercase">{selectedRegion.warning}</p>
+          <p className="font-bold tracking-tight text-sm uppercase">{selectedRegion.warning}</p>
         </motion.div>
 
         {/* Grid */}
         <div id="listings-grid" className="mt-12">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Available Retailers</h2>
+              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Available Retailers</h2>
               <p className="text-slate-500 font-medium">Verified gift cards for {selectedRegion.label}</p>
             </div>
             
@@ -653,17 +653,17 @@ export default function BuyGiftCardsPage() {
                     <div className={`relative h-56 bg-gradient-to-br ${theme.brand} p-8 flex flex-col justify-between text-white overflow-hidden`}>
                       <div className={`absolute inset-0 ${theme.texture}`} />
                       <div className="relative flex justify-between items-start">
-                        <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                        <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-md">
                           {theme.eyebrow}
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl uppercase">
+                        <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl uppercase">
                           {theme.icon}
                         </div>
                       </div>
                       
                       <div className="relative">
                         <div className="text-xs font-bold text-white/60 uppercase tracking-widest mb-1">Gift Card Value</div>
-                        <div className="text-4xl font-black tracking-tight">{formatRegionMoney(card.seller_asking_price || card.price || 0, card.currency || 'USD')}</div>
+                        <div className="text-4xl font-bold tracking-tight">{formatRegionMoney(card.seller_asking_price || card.price || 0, card.currency || 'USD')}</div>
                       </div>
                     </div>
 
@@ -671,21 +671,21 @@ export default function BuyGiftCardsPage() {
                     <div className="p-8 space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-2xl font-black text-slate-900 tracking-tight">{card.retailer}</h3>
+                          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{card.retailer}</h3>
                           <div className="flex items-center gap-1.5 mt-1">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Verified Seller</span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">You Pay</div>
-                          <div className="text-xl font-black text-brand">{formatRegionMoney(card.price || 0, card.currency || 'USD')}</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">You Pay</div>
+                          <div className="text-xl font-bold text-brand">{formatRegionMoney(card.price || 0, card.currency || 'USD')}</div>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Region</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Region</div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <img 
                               src={selectedRegion.flagUrl} 
@@ -696,14 +696,14 @@ export default function BuyGiftCardsPage() {
                           </div>
                         </div>
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Delivery</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Delivery</div>
                           <div className="text-sm font-bold text-slate-700">Instant</div>
                         </div>
                       </div>
 
                       <button 
                         onClick={() => openCheckout(card)}
-                        className="w-full cursor-pointer h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
+                        className="w-full cursor-pointer h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
                       >
                         Buy with Crypto <ArrowRight className="w-4 h-4" />
                       </button>
@@ -715,7 +715,7 @@ export default function BuyGiftCardsPage() {
           ) : (
             <div className="text-center py-20 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
               <Tag className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-              <h3 className="text-2xl font-black text-slate-900 mb-2">No cards available</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">No cards available</h3>
               <p className="text-slate-400 font-medium">Try changing the region or search term.</p>
             </div>
           )}
@@ -753,33 +753,33 @@ export default function BuyGiftCardsPage() {
                 <div className={`relative p-10 flex flex-col justify-between text-white bg-gradient-to-br ${getRetailerTheme(selectedCard.retailer || '').brand}`}>
                   <div className={`absolute inset-0 ${getRetailerTheme(selectedCard.retailer || '').texture}`} />
                   <div className="relative">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest mb-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-bold uppercase tracking-widest mb-8">
                       <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Checkout
                     </div>
-                    <h2 className="text-5xl font-black tracking-tight mb-4">{selectedCard.retailer}</h2>
+                    <h2 className="text-5xl font-bold tracking-tight mb-4">{selectedCard.retailer}</h2>
                     <p className="text-white/60 font-medium leading-relaxed">Verified gift card for {selectedCard.region}. Instant revelation after confirmation.</p>
                   </div>
 
                   <div className="relative space-y-8">
                     <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
-                      <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">Order Summary</div>
+                      <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">Order Summary</div>
                       <div className="space-y-4">
                         <div className="flex justify-between items-end">
                           <span className="text-sm font-bold text-white/60">Gift Card Value</span>
-                          <span className="text-2xl font-black">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price || 0, selectedCard.currency || 'USD')}</span>
+                          <span className="text-2xl font-bold">{formatRegionMoney(selectedCard.seller_asking_price || selectedCard.price || 0, selectedCard.currency || 'USD')}</span>
                         </div>
                         <div className="flex justify-between items-end border-t border-white/10 pt-4">
                           <span className="text-sm font-bold text-white/60">You Pay (ETH)</span>
-                          <span className="text-2xl font-black text-emerald-400">≈ {estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
+                          <span className="text-2xl font-bold text-emerald-400">≈ {estimateEth(selectedCard.price || 0, selectedCard.currency || 'USD').toFixed(6)} ETH</span>
                         </div>
                       </div>
                     </div>
 
                     {expiryTime && (
                       <div className="bg-cta/20 border border-cta/30 rounded-3xl p-6 backdrop-blur-md animate-pulse">
-                        <div className="text-[10px] font-black text-cta uppercase tracking-widest mb-1">Reservation Locked</div>
+                        <div className="text-[10px] font-bold text-cta uppercase tracking-widest mb-1">Reservation Locked</div>
                         <div className="flex items-center justify-between">
-                          <div className="text-3xl font-black text-white">{timeLeft}</div>
+                          <div className="text-3xl font-bold text-white">{timeLeft}</div>
                           <div className="text-[10px] font-bold text-white/60 uppercase text-right">This card is<br/>reserved for you</div>
                         </div>
                       </div>
@@ -792,7 +792,7 @@ export default function BuyGiftCardsPage() {
                   {paymentStep === 'captcha' && (
                     <div className="h-full flex flex-col justify-center text-center">
                       <Lock className="w-16 h-16 text-slate-100 mx-auto mb-6" />
-                      <h3 className="text-3xl font-black text-slate-900 mb-2">Bot Protection</h3>
+                      <h3 className="text-3xl font-bold text-slate-900 mb-2">Bot Protection</h3>
                       <p className="text-slate-500 font-medium mb-8">Please complete the captcha to proceed with your order.</p>
                       <RecaptchaField onVerify={handleCaptchaVerify} />
                     </div>
@@ -801,7 +801,7 @@ export default function BuyGiftCardsPage() {
                   {paymentStep === 'idle' && (
                     <div className="space-y-8">
                       <div>
-                        <h3 className="text-3xl font-black text-slate-900 mb-2">Payment Details</h3>
+                        <h3 className="text-3xl font-bold text-slate-900 mb-2">Payment Details</h3>
                         <p className="text-slate-500 font-medium">Complete payment via MetaMask to reveal code.</p>
                       </div>
 
@@ -812,12 +812,12 @@ export default function BuyGiftCardsPage() {
                               <Bitcoin className="w-6 h-6" />
                             </div>
                             <div>
-                              <div className="font-black text-slate-900">Ethereum</div>
+                              <div className="font-bold text-slate-900">Ethereum</div>
                               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sepolia Network</div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ETA</div>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ETA</div>
                             <div className="font-bold text-slate-700">~30s</div>
                           </div>
                         </div>
@@ -836,7 +836,7 @@ export default function BuyGiftCardsPage() {
 
                       <button 
                         onClick={handlePayment}
-                        className="w-full h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand/20 cursor-pointer"
+                        className="w-full h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand/20 cursor-pointer"
                       >
                         Pay with MetaMask <Wallet className="w-5 h-5" />
                       </button>
@@ -852,7 +852,7 @@ export default function BuyGiftCardsPage() {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-3xl font-black text-slate-900 mb-2">
+                        <h3 className="text-3xl font-bold text-slate-900 mb-2">
                           {paymentStep === 'connecting' && 'Connecting...'}
                           {paymentStep === 'paying' && 'Confirm Payment'}
                           {paymentStep === 'confirming' && 'Processing...'}
@@ -870,15 +870,15 @@ export default function BuyGiftCardsPage() {
                         <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
                           <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-900 mb-2">Code Unlocked!</h3>
+                        <h3 className="text-3xl font-bold text-slate-900 mb-2">Code Unlocked!</h3>
                         <p className="text-slate-500 font-medium">Your payment has been verified on the blockchain.</p>
                       </div>
 
                       <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-8 space-y-6">
                         <div className="space-y-2">
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Card Code</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Card Code</div>
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
+                            <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-bold tracking-widest text-slate-900">
                               {purchasedCard?.card_code || '•••• •••• •••• ••••'}
                             </div>
                             <button 
@@ -896,9 +896,9 @@ export default function BuyGiftCardsPage() {
 
                         {purchasedCard?.card_pin && (
                           <div className="space-y-2">
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security PIN</div>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Security PIN</div>
                             <div className="flex items-center gap-3">
-                              <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-black tracking-widest text-slate-900">
+                              <div className="flex-1 h-14 bg-white border border-slate-200 rounded-xl px-5 flex items-center font-mono text-xl font-bold tracking-widest text-slate-900">
                                 {purchasedCard.card_pin}
                               </div>
                               <button 
@@ -918,7 +918,7 @@ export default function BuyGiftCardsPage() {
 
                       <button 
                         onClick={() => setSelectedCard(null)}
-                        className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest transition-all cursor-pointer"
+                        className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold uppercase tracking-widest transition-all cursor-pointer"
                       >
                         Close Order
                       </button>
