@@ -17,28 +17,28 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Acceptance of Terms</h2>
                 <p>
-                  By accessing and using GitCard Crypto ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services. We reserve the right to modify these terms at any time.
+                  By accessing and using Cards2Crypto, you agree to be bound by the Terms of Service. If you do not agree to these terms, please refrain from using the site. We reserve the right to modify these terms at any given time.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-bold text-slate-900 mb-4">2. Description of Service</h2>
                 <p>
-                  GitCard Crypto operates as a peer-to-peer marketplace facilitating the exchange of gift cards for cryptocurrency. We act as an intermediary to ensure secure transactions but do not directly issue the gift cards listed on the platform.
+                  Cards2Crypto operates as a peer-to-peer marketplace facilitating the exchange of gift cards for cryptocurrency. We act as an intermediary to ensure secure transactions but do not directly issue the gift cards listed on the platform.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-bold text-slate-900 mb-4">3. User Accounts</h2>
                 <p>
-                  While we prioritize privacy and do not mandate strict KYC procedures, users must maintain the security of their account credentials. You are responsible for all activities that occur under your account. We reserve the right to suspend accounts suspected of fraudulent activity.
+                  While we prioritise privacy and do not mandate strict KYC procedures, users must maintain the security of their account credentials. You are responsible for all activities that occur under your account. We reserve the right to suspend accounts suspected of fraudulent activity and we may ask sellers for proof of purchase of the listed gift cards.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-bold text-slate-900 mb-4">4. Transactions & Cryptocurrency</h2>
                 <p>
-                  All cryptocurrency payments are final. We utilize a rate-locking mechanism to protect buyers from extreme volatility during the checkout window. If a payment is received after the rate lock expires, the transaction may be marked as expired and subject to manual review or refund minus network fees.
+                  All purchases are final. We utilise a rate-locking mechanism to protect buyers from price volatility during the checkout window. If a payment is received after the rate lock expires, the transaction may be marked as expired and subject to manual review or refund minus network fees.
                 </p>
               </section>
 

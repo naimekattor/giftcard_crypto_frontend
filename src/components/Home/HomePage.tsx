@@ -29,7 +29,7 @@ const features = [
     icon: Lock,
     color: "brand" as const,
     title: "Complete Anonymity",
-    desc: "No email, no phone, no KYC. Create a username and start trading in seconds.",
+    desc: "Complete anonymity - No KYC checks. Simply register an account and start exchanging right away.",
   },
   {
     icon: Bitcoin,
@@ -64,10 +64,10 @@ const features = [
 ];
 
 const howItWorks = [
-  { step: "01", title: "Sign Up", desc: "Create an anonymous account instantly" },
-  { step: "02", title: "Browse", desc: "Find gift cards at the best prices" },
+  { step: "01", title: "Sign Up", desc: "Create an account instantly" },
+  { step: "02", title: "Browse", desc: "Find discounted gift cards from various retailers" },
   { step: "03", title: "Pay Securely", desc: "Complete payment with cryptocurrency" },
-  { step: "04", title: "Redeem", desc: "Get your balance or funds instantly" },
+  { step: "04", title: "Receive", desc: "You will receive your gift card via email, as well as your buyer dashboard" },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ export default function HomePage() {
             >
               <Bitcoin className="h-3.5 w-3.5 text-brand animate-pulse" />
               <span className="text-xs font-semibold tracking-wider text-slate-600 uppercase">
-                Buy gift cards with crypto
+                BUY/SELL Gift Cards for Crypto 
               </span>
             </motion.div>
 
@@ -139,7 +139,7 @@ export default function HomePage() {
               >
                 <Link href="/signup" className="w-full sm:w-auto">
                   <Button className="w-full sm:w-auto bg-brand hover:bg-brand/90 text-white text-base font-bold px-8 h-14 rounded-2xl shadow-xl shadow-brand/20 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
-                    Start Trading Now
+                    Start Exchanging Now
                   </Button>
                 </Link>
                 <Link href="/buy-gift-cards" className="w-full sm:w-auto">
@@ -186,10 +186,10 @@ export default function HomePage() {
 
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
-              WHY TRADERS CHOOSE US
+              WHY CHOOSE US
             </h2>
             <p className="text-slate-500 font-medium text-lg">
-              Built for speed, privacy, and the best rates in the market.
+              Cards2Crypto allows for buyers and sellers to exchange gift cards for crypto currency. Near instant delivery for buyers and quick payouts for sellers. It's a no brainer.
             </p>
           </div>
 
@@ -233,7 +233,7 @@ export default function HomePage() {
               HOW IT WORKS
             </h2>
             <p className="text-slate-500 font-medium text-lg">
-              Four simple steps to start trading assets securely.
+              Four simple steps to start buying a gift card.
             </p>
           </div>
 
@@ -277,7 +277,7 @@ export default function HomePage() {
                 variant="outline"
                 className="group border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-50 rounded-xl px-6 h-11 text-sm font-semibold transition-all duration-200 cursor-pointer"
               >
-                See the full walkthrough 
+                Read More  
                 <ArrowRight className="w-4 h-4 ml-2 inline transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
@@ -302,14 +302,14 @@ export default function HomePage() {
 
             <div className="relative z-10 max-w-2xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
-                Ready to Trade Smarter?
+                Join Us
               </h2>
               <p className="text-base md:text-lg text-slate-400 mb-10 font-medium max-w-lg mx-auto">
                 Join thousands of users already buying and selling gift cards anonymously with crypto.
               </p>
               <Link href="/signup" className="inline-block w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-cta hover:bg-cta/90 text-white h-14 px-10 rounded-xl text-base font-bold shadow-xl shadow-cta/20 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer">
-                  Create Anonymous Account — Free
+                  Create An Account — Free
                 </Button>
               </Link>
             </div>

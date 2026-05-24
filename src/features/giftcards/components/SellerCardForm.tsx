@@ -317,12 +317,7 @@ export function SellerCardForm() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100 overflow-hidden">
-        {apiError && (
-          <div className="mb-8 bg-red-50 border-2 border-red-100 text-red-700 rounded-2xl p-5 text-sm font-bold flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            {apiError}
-          </div>
-        )}
+        
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
@@ -498,7 +493,7 @@ export function SellerCardForm() {
                   <span className="font-semibold text-slate-800">{regionMeta.flag} {regionMeta.label}</span>
                   <span className="text-slate-500">Currency</span>
                   <span className="font-semibold text-slate-800">{regionMeta.currency} ({regionMeta.symbol})</span>
-                  <span className="text-slate-500">Estimated Payout</span>
+                  <span className="text-slate-500">Amount you will receive</span>
                   <span className="font-bold text-brand flex items-center gap-1">
                     {regionMeta.symbol}{pricing?.sellerReceives.toFixed(2)}
                     {regionMeta.currency !== 'USD' && (
@@ -517,7 +512,7 @@ export function SellerCardForm() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-black tracking-wide">ERC-20 Wallet</h3>
-                    <p className="text-xs font-semibold text-black/80 uppercase tracking-widest">ETH or USDC Address</p>
+                    <p className="text-xs font-semibold text-black/80 uppercase tracking-widest">ETH or USDC </p>
                   </div>
                 </div>
                 
@@ -544,13 +539,20 @@ export function SellerCardForm() {
                     Back
                   </button>
                   <button type="submit" disabled={isSubmitting || !captchaToken} className="flex-[2] h-16 bg-brand hover:bg-brand/90 text-white rounded-2xl font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all disabled:opacity-30 shadow-xl shadow-brand/20">
-                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Finalize Listing <Plus className="w-5 h-5" /></>}
+                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Finalise Listing <Plus className="w-5 h-5" /></>}
                   </button>
                 </div>
               </div>
+
             </motion.div>
           )}
         </AnimatePresence>
+        {apiError && (
+          <div className="mt-8 bg-red-50 border-2 border-red-100 text-red-700 rounded-2xl p-5 text-sm font-bold flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            {apiError}
+          </div>
+        )}
       </form>
     </div>
   );

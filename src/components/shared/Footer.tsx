@@ -24,7 +24,7 @@ export const Footer = () => {
               <Link href="#" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-brand hover:bg-brand/5 transition-all">
                 <Discord size={18} />
               </Link>
-              <Link href="mailto:support@giftcard.market" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-brand hover:bg-brand/5 transition-all">
+              <Link href="mailto:support@cards2crypto.co.uk" className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-brand hover:bg-brand/5 transition-all">
                 <Mail size={18} />
               </Link>
             </div>
@@ -56,6 +56,7 @@ export const Footer = () => {
               </li>
               <li><Link href="/contact" className="text-slate-600 hover:text-brand transition-colors">Support </Link></li>
               <li><Link href="/about" className="text-slate-600 hover:text-brand transition-colors">About Us  </Link></li>
+              <li><Link href="/giveaway-comingSoon" className="text-slate-600 hover:text-brand transition-colors">Give Away  </Link></li>
             </ul>
           </div>
 

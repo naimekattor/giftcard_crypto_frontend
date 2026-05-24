@@ -496,7 +496,7 @@ export default function BuyGiftCardsPage() {
               </div>
               
               <div className="bg-[#2a2420] rounded-3xl p-6 min-w-[240px] cursor-default">
-                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">Crypto Rails</div>
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">Crypto Accepted</div>
                 <div className="text-lg font-semibold text-white ">Over 50 crypto<br/>currencies accepted</div>
               </div>
             </motion.div>
