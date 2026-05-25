@@ -157,6 +157,9 @@ export default function SellerDashboardPage() {
     );
   }
 
+  // Prevent rendering dashboard if not authenticated (middleware will redirect)
+  if (!user) return null;
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       {toast && (

@@ -85,16 +85,8 @@ export default function AdminDashboard() {
     </div>
   );
 
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        <div className="text-center">
-          <p className="text-xl mb-4">Access Denied</p>
-          <p className="text-slate-400">You do not have permission to view this page</p>
-        </div>
-      </div>
-    );
-  }
+  // Prevent rendering if not authenticated or not admin (middleware will redirect)
+  if (!user || user.role !== 'admin') return null;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">

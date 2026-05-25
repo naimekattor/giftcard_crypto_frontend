@@ -93,9 +93,7 @@ export const generateAnonymousId = (): string => {
  * Check if user is authenticated
  */
 export const isAuthenticated = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  const token = localStorage.getItem('gc_auth_token');
-  return !!token;
+  return !!getAuthToken();
 };
 
 /**
@@ -103,6 +101,17 @@ export const isAuthenticated = (): boolean => {
  */
 export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null;
+  
+  // Try gc_jwt_user first (which contains the current logged-in user object)
+  const saved = localStorage.getItem('gc_jwt_user');
+  if (saved) {
+    try {
+      const user = JSON.parse(saved);
+      if (user && user.token) return user.token;
+    } catch (_) {}
+  }
+  
+  // Fallback to legacy gc_auth_token
   return localStorage.getItem('gc_auth_token');
 };
 
@@ -122,9 +131,11 @@ export const getAuthHeader = (): Record<string, string> => {
  */
 export const clearAuthTokens = (): void => {
   if (typeof window === 'undefined') return;
+  localStorage.removeItem('gc_jwt_user');
   localStorage.removeItem('gc_auth_token');
   localStorage.removeItem('gc_refresh_token');
   localStorage.removeItem('gc_user');
+  document.cookie = 'gc_jwt_user=; path=/; max-age=0; SameSite=Lax;';
 };
 
 /**

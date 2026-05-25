@@ -26,6 +26,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'gc_jwt_user';
 
+// Helper functions for setting/clearing cookies
+const setAuthCookie = (user: AuthUser) => {
+  if (typeof window === 'undefined') return;
+  document.cookie = `${STORAGE_KEY}=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=604800; SameSite=Lax;`;
+};
+
+const clearAuthCookie = () => {
+  if (typeof window === 'undefined') return;
+  document.cookie = `${STORAGE_KEY}=; path=/; max-age=0; SameSite=Lax;`;
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,9 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setUser(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        setAuthCookie(parsed);
+      }
     } catch {
       localStorage.removeItem(STORAGE_KEY);
+      clearAuthCookie();
     } finally {
       setIsLoading(false);
     }
@@ -44,11 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (newUser: AuthUser) => {
     setUser(newUser);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
+    setAuthCookie(newUser);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
+    clearAuthCookie();
   };
 
   const switchActiveRole = async (role: UserRole) => {
@@ -63,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setUser(updatedUser);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+      setAuthCookie(updatedUser);
     } catch (err: any) {
       throw new Error(err.message || 'Failed to switch role');
     }
@@ -80,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setUser(updatedUser);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+      setAuthCookie(updatedUser);
     } catch (err: any) {
       throw new Error(err.message || 'Failed to upgrade role');
     }
