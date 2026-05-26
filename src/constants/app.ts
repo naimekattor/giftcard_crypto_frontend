@@ -54,9 +54,9 @@ export const ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   MARKETPLACE: '/buy-gift-cards',
-  DASHBOARD_BUYER: '/buyer/dashboard',
-  DASHBOARD_SELLER: '/seller/dashboard',
-  DASHBOARD_ADMIN: '/admin/dashboard',
+  DASHBOARD_BUYER: '/dashboard/buyer',
+  DASHBOARD_SELLER: '/dashboard/seller',
+  DASHBOARD_ADMIN: '/admin',
   WALLET: '/wallet',
   TRANSACTIONS: '/transactions',
 } as const;

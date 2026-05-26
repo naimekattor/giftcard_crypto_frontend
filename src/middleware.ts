@@ -7,11 +7,10 @@ export function middleware(request: NextRequest) {
   const cookie = request.cookies.get('gc_jwt_user');
   const userJson = cookie?.value;
 
-  const isBuyerRoute = pathname.startsWith('/buyer') || pathname.startsWith('/dashboard/buyer');
+  const isBuyerRoute = pathname.startsWith('/dashboard/buyer');
   const isSellerRoute = pathname.startsWith('/dashboard/seller');
-  const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/dashboard/admin');
 
-  const isProtectedRoute = isBuyerRoute || isSellerRoute || isAdminRoute;
+  const isProtectedRoute = isBuyerRoute || isSellerRoute;
 
   if (isProtectedRoute) {
     if (!userJson) {
@@ -25,17 +24,7 @@ export function middleware(request: NextRequest) {
       const activeRole = decodedUser.role;
       const roles = decodedUser.roles || [activeRole];
 
-      if (isAdminRoute) {
-        if (activeRole !== 'admin' && !roles.includes('admin')) {
-          // Redirect to their default dashboard if not admin
-          const redirectPath = roles.includes('seller')
-            ? '/dashboard/seller'
-            : roles.includes('buyer')
-            ? '/dashboard/buyer'
-            : '/login';
-          return NextResponse.redirect(new URL(redirectPath, request.url));
-        }
-      } else if (isSellerRoute) {
+      if (isSellerRoute) {
         if (activeRole !== 'seller' && !roles.includes('seller')) {
           const redirectPath = roles.includes('admin')
             ? '/admin'
@@ -68,8 +57,5 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/buyer/:path*',
-    '/seller/:path*',
-    '/admin/:path*',
   ],
 };

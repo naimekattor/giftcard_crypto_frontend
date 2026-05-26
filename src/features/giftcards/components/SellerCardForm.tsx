@@ -496,11 +496,11 @@ export function SellerCardForm() {
                   <span className="text-slate-500">Amount you will receive</span>
                   <span className="font-bold text-brand flex items-center gap-1">
                     {regionMeta.symbol}{pricing?.sellerReceives.toFixed(2)}
-                    {regionMeta.currency !== 'USD' && (
+                    {/* {regionMeta.currency !== 'USD' && (
                       <span className="text-xs text-slate-500 font-medium normal-case">
                         (~${(pricing ? pricing.sellerReceives / (rates[regionMeta.currency] || 1) : 0).toFixed(2)} USD)
                       </span>
-                    )}
+                    )} */}
                   </span>
                 </div>
               </div>

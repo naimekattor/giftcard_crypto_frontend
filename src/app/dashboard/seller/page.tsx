@@ -3,11 +3,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import Swal from 'sweetalert2';
 
 import { useAuth } from '@/features/auth/contexts/AuthContext';
-import { useLogout } from '@/features/auth/hooks/useAuth';
 import { sellerApi, type CardRecord } from '@/services/dashboardApi';
 
 const statusStyles: Record<string, string> = {
@@ -54,15 +52,13 @@ const currencySymbols: Record<string, string> = {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function SellerDashboardPage() {
-  const { user, isLoading: authLoading, switchActiveRole, upgradeToRole } = useAuth();
-  const logout = useLogout();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [cards, setCards] = useState<CardRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
@@ -161,7 +157,7 @@ export default function SellerDashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <>
       {toast && (
         <div
           className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl shadow-xl font-medium text-sm transition-all ${
@@ -171,148 +167,6 @@ export default function SellerDashboardPage() {
           {toast.msg}
         </div>
       )}
-
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-slate-900 border-r border-white/5 z-40 flex flex-col transition-transform duration-300
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
-      >
-        <div className="p-6 border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="inline-block mb-6" onClick={() => setSidebarOpen(false)}>
-              <Image src="/logo.png" alt="GiftCard Market" width={150} height={40} />
-            </Link>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1">
-          <div className="bg-orange-600/20 text-orange-400 rounded-xl px-4 py-3 flex items-center gap-3 text-sm font-semibold">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            My Listings
-          </div>
-
-          <Link
-            href="/seller"
-            onClick={() => setSidebarOpen(false)}
-            className="text-slate-400 hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 flex items-center gap-3 text-sm transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            List New Card
-          </Link>
-
-          <Link
-            href="/buy-gift-cards"
-            onClick={() => setSidebarOpen(false)}
-            className="text-slate-400 hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 flex items-center gap-3 text-sm transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
-            View Marketplace
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-white/5 space-y-3">
-          <div className="px-3 py-2.5 bg-white/5 rounded-xl">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Active Account</p>
-            <p className="text-xs font-semibold text-slate-300 truncate mb-2">{user?.email}</p>
-            {user?.roles?.includes('buyer') && user?.roles?.includes('seller') ? (
-              <button
-                onClick={async () => {
-                  try {
-                    await switchActiveRole('buyer');
-                    router.push('/dashboard/buyer');
-                  } catch (err: any) {
-                    Swal.fire({ title: 'Error', text: err.message, icon: 'error', background: '#0f172a', color: '#fff' });
-                  }
-                }}
-                className="w-full py-1.5 px-3 bg-white/5 hover:bg-white/10 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-between border border-white/10"
-              >
-                <span>Switch to Buyer</span>
-                <span>🛒</span>
-              </button>
-            ) : (
-              <button
-                onClick={async () => {
-                  const res = await Swal.fire({
-                    title: 'Become a Buyer?',
-                    text: 'Do you want to buy gift cards on our platform? Upgrade your account instantly!',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, upgrade!',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#2563eb',
-                    cancelButtonColor: '#334155',
-                    background: '#0f172a',
-                    color: '#fff'
-                  });
-                  if (res.isConfirmed) {
-                    try {
-                      await upgradeToRole('buyer');
-                      router.push('/dashboard/buyer');
-                    } catch (err: any) {
-                      Swal.fire({ title: 'Error', text: err.message, icon: 'error', background: '#0f172a', color: '#fff' });
-                    }
-                  }
-                }}
-                className="w-full py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all text-center"
-              >
-                🚀 Become a Buyer
-              </button>
-            )}
-          </div>
-          <button
-            onClick={logout}
-            className="w-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl px-4 py-2 flex items-center gap-2 text-sm transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            Sign out
-          </button>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <div className="lg:ml-64 flex-1 min-h-screen flex flex-col">
-        <header className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur border-b border-white/5 px-4 py-3 flex items-center gap-3 lg:hidden">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all"
-            aria-label="Open menu"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <span className="font-bold text-white text-sm">Seller Dashboard</span>
-        </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -456,7 +310,6 @@ export default function SellerDashboardPage() {
             )}
           </div>
         </main>
-      </div>
-    </div>
+    </>
   );
 }
