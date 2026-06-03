@@ -656,8 +656,25 @@ export default function BuyGiftCardsPage() {
                         <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-md">
                           {theme.eyebrow}
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl uppercase">
-                          {theme.icon}
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ${
+                          card.file_path 
+                            ? 'bg-white shadow-sm p-1.5' 
+                            : 'bg-white/10 border border-white/20 backdrop-blur-md font-bold text-xl uppercase'
+                        }`}>
+                          {
+                            card.file_path ?
+                            (
+                              <img
+                                src={`${API_BASE}/${card.file_path}`}
+                                alt={card.retailer || card.retailerName || 'Retailer logo'}
+                                className="w-full h-full object-contain"
+                              />
+                            ):(
+                              <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 flex items-center justify-center">
+                                {theme.icon}
+                              </div>
+                            )
+                          }
                         </div>
                       </div>
                       

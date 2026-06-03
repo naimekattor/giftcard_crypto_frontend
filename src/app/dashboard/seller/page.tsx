@@ -244,11 +244,11 @@ export default function SellerDashboardPage() {
                           <td className="px-4 lg:px-6 py-4">
                             <div className="flex items-center gap-3">
                               {card.file_path ? (
-                                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-white p-1 flex items-center justify-center">
                                   <img
                                     src={`${API_BASE}/${card.file_path}`}
-                                    alt={card.name}
-                                    className="w-full h-full object-cover"
+                                    alt={card.name || card.retailer || 'Retailer logo'}
+                                    className="w-full h-full object-contain"
                                   />
                                 </div>
                               ) : (

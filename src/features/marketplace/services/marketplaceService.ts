@@ -40,6 +40,7 @@ export const marketplaceService = {
         seller_asking_price: card.seller_asking_price,
         createdAt: new Date().toISOString(),
         description: card.description,
+        file_path: card.file_path,
         sellerId: 'anonymous',
         seller: {
           id: 'anonymous',
