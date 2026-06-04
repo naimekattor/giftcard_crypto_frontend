@@ -8,6 +8,8 @@ import { Loader2, Plus, ArrowRight, ArrowLeft, Upload, ShieldCheck, Wallet, Glob
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { RecaptchaField } from '@/components/shared/RecaptchaField';
+import Swal from 'sweetalert2';
+import { useRouter } from 'next/navigation'
 
 const REGIONS = [
   { code: 'USA', label: 'United States', flag: '🇺🇸', currency: 'USD', symbol: '$' },
@@ -95,7 +97,7 @@ export function SellerCardForm() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1, GBP: 0.79, CAD: 1.36, ETH: 2650 });
   const [codeWarning, setCodeWarning] = useState<string | null>(null);
-
+  const router=useRouter();
   useEffect(() => {
     fetch(`${API_BASE}/exchange-rates`)
       .then(res => res.json())
@@ -206,6 +208,28 @@ export function SellerCardForm() {
   const nextStep = async () => {
     clearErrors(['retailer', 'region', 'price', 'cardCode', 'pin']);
     setCodeWarning(null);
+
+    if (!user) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'You must be logged in as a seller to proceed.',
+      icon: 'error',
+      background: '#1e1e24',
+      color: '#ffffff',
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'Go to Login',
+      allowOutsideClick: false, 
+      customClass: {
+        popup: 'rounded-2xl border border-white/10 shadow-2xl',
+      }
+    }).then((result) => {
+      if (result.isConfirmed || result.isDismissed) {
+        router.push('/login'); 
+      }
+    });
+    return; 
+  }
+    
     const isValid = await trigger(['retailer', 'region', 'price', 'cardCode']);
     if (!isValid) return;
 
@@ -232,10 +256,7 @@ export function SellerCardForm() {
   const prevStep = () => setStep(1);
 
   const onSubmit = async (data: FormData) => {
-    if (!user) {
-      setApiError('You must be logged in as a seller to list a card.');
-      return;
-    }
+    
     if (!captchaToken) {
       setApiError('Please complete the reCAPTCHA verification.');
       return;
@@ -547,12 +568,7 @@ export function SellerCardForm() {
             </motion.div>
           )}
         </AnimatePresence>
-        {apiError && (
-          <div className="mt-8 bg-red-50 border-2 border-red-100 text-red-700 rounded-2xl p-5 text-sm font-bold flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            {apiError}
-          </div>
-        )}
+        
       </form>
     </div>
   );

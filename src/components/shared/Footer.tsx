@@ -76,17 +76,11 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-            © 2026 GiftCard Market. Decentralised Peer-to-Peer Trading.
-          </p>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
-              <span className="w-1.5 h-1.5 rounded-full bg-status-completed" /> 
-              Global Infrastructure Active
-            </div>
-          </div>
-        </div>
+        <div className="pt-10 border-t border-slate-100 text-center gap-4">
+  <p className="text-[11px] font-bold text-slate-400  tracking-widest">
+    2026 © Cards2Crypto
+  </p>
+</div>
       </div>
     </footer>
   );
